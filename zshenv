@@ -1,4 +1,7 @@
 local _old_path="$PATH"
+# use vim as the visual editor
+export VISUAL=atom
+export EDITOR=$VISUAL
 
 # Local config
 [[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
