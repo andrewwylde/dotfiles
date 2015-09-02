@@ -1,2 +1,15 @@
 !bin
 vim/bundle/
+zsh/
+git_template/
+
+# Keep most of bin/ ignored, but allow explicit scripts (e.g. installers) to be tracked.
+# Ignore everything under bin, then explicitly unignore the files we want in git.
+bin/*
+!bin/install-commitizen
+!bin/git-*
+
+vim/bundle/
+zsh/
+git_template/
+.git/

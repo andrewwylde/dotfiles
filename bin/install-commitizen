@@ -1,0 +1,119 @@
+#!/usr/bin/env zsh
+# Installer for Commitizen (works with npm, pnpm or yarn)
+# Places a ~/.czrc pointing to the conventional changelog adapter.
+
+set -euo pipefail
+
+echo "==> install-commitizen: setting up Commitizen and cz-conventional-changelog"
+
+run_cmd() {
+  echo "+ $*"
+  eval "$@"
+}
+
+if command -v npm >/dev/null 2>&1; then
+  PKG_TOOL=npm
+elif command -v pnpm >/dev/null 2>&1; then
+  PKG_TOOL=pnpm
+elif command -v yarn >/dev/null 2>&1; then
+  PKG_TOOL=yarn
+else
+  PKG_TOOL=none
+fi
+
+if [[ $PKG_TOOL = none ]]; then
+  echo "No npm/pnpm/yarn detected."
+  if command -v brew >/dev/null 2>&1; then
+    echo "Homebrew found. I can install Node (which provides npm) for you."
+    read -q "REPLY?Install Node via Homebrew now? [y/N] " && echo
+    if [[ $REPLY = [yY] || $REPLY = [yY][eE][sS] ]]; then
+      run_cmd "brew install node"
+      PKG_TOOL=npm
+    else
+      echo "Skipping install. Please install Node (or pnpm/yarn) and re-run this script." >&2
+      exit 1
+    fi
+  else
+    echo "Please install Node.js (https://nodejs.org/) or pnpm/yarn and re-run this script." >&2
+    exit 1
+  fi
+fi
+
+echo "Using package tool: $PKG_TOOL"
+
+case "$PKG_TOOL" in
+  npm)
+    run_cmd "npm install -g commitizen cz-conventional-changelog"
+    ;;
+  pnpm)
+    run_cmd "pnpm add -g commitizen cz-conventional-changelog"
+    ;;
+  yarn)
+    run_cmd "yarn global add commitizen cz-conventional-changelog"
+    ;;
+esac
+
+# Create a user-level .czrc if it doesn't exist. This is safe and helps new machines.
+CZRC="$HOME/.czrc"
+if [[ -f "$CZRC" ]]; then
+  echo "Found existing $CZRC — leaving it alone."
+else
+  echo "Creating $CZRC to use cz-conventional-changelog adapter"
+  cat > "$CZRC" <<'EOF'
+{
+  "path": "cz-conventional-changelog"
+}
+EOF
+  echo "Wrote $CZRC"
+fi
+
+echo "Commitizen installed. To use it run: git cz"
+echo "If you want this repo to carry the .czrc via your dotfiles, ensure .czrc is tracked and rcup/rcm will symlink it."
+
+exit 0
+#!/usr/bin/env bash
+# Installer for Commitizen + conventional changelog adapter
+# Designed to be run on macOS during machine setup. Makes a best-effort to
+# install Node (via brew) if `npm` isn't available, then globally installs
+# commitizen and the popular `cz-conventional-changelog` adapter.
+
+set -euo pipefail
+
+print() { printf "%s\n" "$*"; }
+
+if ! command -v npm >/dev/null 2>&1; then
+  print "npm not found. Attempting to install Node (which includes npm) via Homebrew..."
+  if ! command -v brew >/dev/null 2>&1; then
+    print "Homebrew not found. Please install Homebrew (https://brew.sh/) or install Node/nvm manually and re-run this script."
+    exit 1
+  fi
+  brew install node
+fi
+
+print "Installing commitizen and cz-conventional-changelog globally..."
+# Prefer a straightforward global install. On systems where global npm installs
+# require special permissions, users should use nvm or adjust npm prefix.
+if npm install -g commitizen cz-conventional-changelog; then
+  print "Installed commitizen and cz-conventional-changelog."
+else
+  print "Global npm install failed. You may need to use a node version manager (nvm), or run the install with elevated permissions."
+  print "Try: npm install -g commitizen cz-conventional-changelog"
+  exit 1
+fi
+
+# Create a ~/.czrc if one doesn't already exist. Many users prefer the repo
+# to provide a `.czrc` which is symlinked into place by `rcup`. If it's missing
+# create a minimal one here so `git cz` works immediately.
+if [[ ! -f "$HOME/.czrc" ]]; then
+  print "No ~/.czrc found — creating a default config that uses cz-conventional-changelog..."
+  cat > "$HOME/.czrc" <<'EOF'
+{
+  "path": "cz-conventional-changelog"
+}
+EOF
+  print "Created ~/.czrc"
+else
+  print "Found existing ~/.czrc — leaving it in place."
+fi
+
+print "Done. You can now run 'git cz' (alias gcz) to make conventional commits." 

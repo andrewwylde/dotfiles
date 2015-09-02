@@ -1,4 +1,4 @@
-thoughtbot dotfiles
+My dotfiles
 ===================
 
 ![prompt](http://images.thoughtbot.com/thoughtbot-dotfiles-prompt.png)
@@ -15,10 +15,10 @@ Install
 
 Clone onto your laptop:
 
-    git clone git://github.com/thoughtbot/dotfiles.git ~/dotfiles
+    git clone git://github.com/codelemur/dotfiles.git
 
-(Or, [fork and keep your fork
-updated](http://robots.thoughtbot.com/keeping-a-github-fork-updated)).
+(Or, fork and keep your fork
+updated).
 
 Install [rcm](https://github.com/thoughtbot/rcm):
 
@@ -229,7 +229,59 @@ Shell aliases and scripts:
 * `replace foo bar **/*.rb` to find and replace within a given list of files.
 * `tat` to attach to tmux session named the same as the current directory.
 * `v` for `$VISUAL`.
+*
 
+```
+{
+	"Seti_SB_big": true,
+	"Seti_SB_bright": true,
+	"Seti_in_4_a_treat": true,
+	"Seti_no_blue_bar": false,
+	"caret_extra_bottom": 3,
+	"caret_extra_top": 3,
+	"caret_extra_width": 2,
+	"color_scheme": "Packages/Seti_UI/Scheme/Seti.tmTheme",
+	"draw_white_space": "all",
+	"font_size": 12,
+	"highlight_line": true,
+	"ignored_packages":
+	[
+		"Markdown",
+		"Vintage"
+	],
+	"show_full_path": true,
+	"theme": "Seti.sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true
+}
+```
+
+## sublime-text keybindings
+```
+[
+  {
+    "keys": ["ctrl+super+up"],
+    "command": "swap_line_up"
+  },
+  {
+    "keys": ["ctrl+super+down"],
+    "command": "swap_line_down"
+  },
+  {
+    "keys": ["super+alt+f"],
+    "command": "show_panel",
+    "args": {
+      "panel": "replace",
+      "reverse": false
+    }
+  },
+  {
+        "keys": ["super+\\"], "command": "esformatter"
+    }
+
+]
+
+```
 Thanks
 ------
 
@@ -245,18 +297,3 @@ dotfiles is copyright © 2009-2018 thoughtbot. It is free software, and may be
 redistributed under the terms specified in the [`LICENSE`] file.
 
 [`LICENSE`]: /LICENSE
-
-About thoughtbot
-----------------
-
-![thoughtbot](http://presskit.thoughtbot.com/images/thoughtbot-logo-for-readmes.svg)
-
-dotfiles is maintained and funded by thoughtbot, inc.
-The names and logos for thoughtbot are trademarks of thoughtbot, inc.
-
-We love open source software!
-See [our other projects][community].
-We are [available for hire][hire].
-
-[community]: https://thoughtbot.com/community?utm_source=github
-[hire]: https://thoughtbot.com/hire-us?utm_source=github
