@@ -16,6 +16,8 @@ export PS1='${SSH_CONNECTION+"%{$fg_bold[green]%}%n@%m:"}%{$fg_bold[blue]%}%c%{$
 export PATH=~/.local/bin:$PATH
 setopt promptsubst
 
+ZSH_THEME="agnoster"
+
 # load our own completion functions
 fpath=(~/.zsh/completion /usr/local/share/zsh/site-functions $fpath)
 

@@ -6,7 +6,6 @@
 [color]
   ui = auto
 [core]
-  excludesfile = ~/.gitignore
   autocrlf = input
 	editor = /usr/bin/vim
 [commit]
