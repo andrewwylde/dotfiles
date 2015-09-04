@@ -1,4 +1,5 @@
-# thoughtbot dotfiles
+My dotfiles
+===================
 
 ![prompt](http://images.thoughtbot.com/thoughtbot-dotfiles-prompt.png)
 
@@ -12,10 +13,10 @@ Set zsh as your login shell:
 
 Clone onto your laptop:
 
-    git clone git@github.com:thoughtbot/dotfiles.git ~/dotfiles
+    git clone git://github.com/andrewwylde/dotfiles.git
 
-(Or, [fork and keep your fork
-updated](http://robots.thoughtbot.com/keeping-a-github-fork-updated)).
+(Or, fork and keep your fork
+updated).
 
 Install [rcm](https://github.com/thoughtbot/rcm):
 
