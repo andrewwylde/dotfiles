@@ -4,7 +4,7 @@
 [color]
   ui = auto
 [core]
-  excludesfile = ~/.gitignore
+	excludesfile = /Users/andrewellis/.gitignore
   autocrlf = input
   editor = vim
 [commit]
@@ -17,3 +17,9 @@
   path = ~/.gitconfig.local
 [diff]
   colorMoved = zebra
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
