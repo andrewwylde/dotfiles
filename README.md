@@ -203,6 +203,32 @@ Shell aliases and scripts:
 * `replace foo bar **/*.rb` to find and replace within a given list of files.
 * `tat` to attach to tmux session named the same as the current directory.
 * `v` for `$VISUAL`.
+* 
+
+```
+{
+	"Seti_SB_big": true,
+	"Seti_SB_bright": true,
+	"Seti_in_4_a_treat": true,
+	"Seti_no_blue_bar": false,
+	"caret_extra_bottom": 3,
+	"caret_extra_top": 3,
+	"caret_extra_width": 2,
+	"color_scheme": "Packages/Seti_UI/Scheme/Seti.tmTheme",
+	"draw_white_space": "all",
+	"font_size": 12,
+	"highlight_line": true,
+	"ignored_packages":
+	[
+		"Markdown",
+		"Vintage"
+	],
+	"show_full_path": true,
+	"theme": "Seti.sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true
+}
+```
 
 Thanks
 ------
