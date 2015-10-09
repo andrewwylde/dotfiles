@@ -260,6 +260,32 @@ Shell aliases and scripts:
 }
 ```
 
+## sublime-text keybindings
+```
+[
+  {
+    "keys": ["ctrl+super+up"],
+    "command": "swap_line_up"
+  },
+  {
+    "keys": ["ctrl+super+down"],
+    "command": "swap_line_down"
+  },
+  {
+    "keys": ["super+alt+f"],
+    "command": "show_panel",
+    "args": {
+      "panel": "replace",
+      "reverse": false
+    }
+  },
+  {
+        "keys": ["super+\\"], "command": "esformatter"
+    }
+
+]
+
+```
 ## Thanks
 
 Thank you, [contributors](https://github.com/thoughtbot/dotfiles/contributors)!
