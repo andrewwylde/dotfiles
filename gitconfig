@@ -15,8 +15,7 @@
 [core]
 	excludesfile = /Users/andrewellis/.gitignore
   autocrlf = input
-[merge]
-  ff = only
+	editor = subl -n -w
 [commit]
   template = ~/.gitmessage
 [fetch]
@@ -25,9 +24,9 @@
   autosquash = true
 [include]
   path = ~/.gitconfig.local
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+[merge]
+  tool = opendiff
+
+[user]
+	name = Andrew Ellis
+	email = astoellis@gmail.com
