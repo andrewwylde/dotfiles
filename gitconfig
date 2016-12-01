@@ -6,7 +6,7 @@
 [color]
   ui = auto
 [core]
-	excludesfile = /Users/andrewellis/.gitignore
+  excludesfile = ~/.gitignore
   autocrlf = input
   editor = vim
 [commit]
