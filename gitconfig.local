@@ -1,0 +1,14 @@
+[mergetool "opendiff"]
+  path = /usr/bin/opendiff
+[merge]
+  tool = opendiff
+[difftool "opendiff"]
+  path = /usr/bin/opendiff
+[diff]
+  tool = opendiff
+[difftool]
+  prompt = false
+[user]
+  name = Andrew Ellis
+  email = astoellis@gmail.com
+
