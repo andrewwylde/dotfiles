@@ -20,3 +20,4 @@ alias path='echo $PATH | tr -s ":" "\n"'
 
 # More Git
 alias gcd="git checkout develop"
+alias gpr="git pull --rebase"
