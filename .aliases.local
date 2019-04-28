@@ -1,2 +1,5 @@
 # Unix
 alias la="ls -a"
+
+alias dm="docker-machine"
+alias dco="docker-compose"

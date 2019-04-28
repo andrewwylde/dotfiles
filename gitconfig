@@ -14,10 +14,6 @@
 [rebase]
   autosquash = true
 [include]
-  path = ~/dotfiles/gitconfig.local
-[merge]
-  tool = opendiff
-
-[user]
-	name = Andrew Ellis
-	email = astoellis@gmail.com
+  path = ~/.gitconfig.local
+[diff]
+  colorMoved = zebra
