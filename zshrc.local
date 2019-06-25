@@ -1,0 +1,38 @@
+autoload -Uz compinit && compinit -i
+# Path to your oh-my-zsh installation.
+# export ZSH=/Users/aellis/.oh-my-zsh
+export ZSH=/home/drewkakes/.oh-my-zsh
+plugins=(git)
+
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="simple"
+
+# added by Anaconda2 2.5.0 installer
+export PATH="/home/drewkakes/anaconda2/bin:$PATH"
+
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
+
+
+# Android
+export PATH="/home/drewkakes/Android/Sdk/platform-tools:/home/drewkakes/Android/Sdk/tools:$PATH"
+export ANDROID_HOME="/home/drewkakes/Android/Sdk/"
+
+export PATH="/usr/local/texlive/2016/bin/x86_64-linux:$PATH"
+alias tree="tree -I node_modules"
+export PATH="$(yarn global bin):$PATH"
+
+export NVM_DIR="/home/drewkakes/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# firefox touchscreen stuff
+MOZ_USE_XINPUT2=1
+
+export PATH="/home/drewkakes/Code/liquibase:$PATH"
+export CLASSPATH=/home/drewkakes/Code/personal/sprawler-api/liquibase/lib/postgresql-42.2.5.jar
+
+source $ZSH/oh-my-zsh.sh

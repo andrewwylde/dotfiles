@@ -1,7 +1,7 @@
-[mergetool "opendiff"]
+[mergetool "meld"]
   path = /usr/bin/meld
 [merge]
-  tool = opendiff
+  tool = meld
 [difftool "meld"]
   path = /usr/bin/meld
 [diff]

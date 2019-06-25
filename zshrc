@@ -57,7 +57,6 @@ _load_settings "$HOME/.zsh/configs"
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 # aliases
 [[ -f ~/.aliases ]] && source ~/.aliases
-[[ -f ~/.zshrc.local.old ]] && source ~/.zshrc.local.old
 alias dm="docker-machine"
 alias dm="docker-machine"
 alias dco="docker-compose"
