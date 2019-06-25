@@ -8,7 +8,7 @@ git_prompt_info() {
 setopt promptsubst
 export PS1='${SSH_CONNECTION+"%{$fg_bold[green]%}%n@%m:"}%{$fg_bold[blue]%}%c%{$reset_color%}$(git_prompt_info) %# '
 
-ZSH_THEME="agnoster"
+ZSH_THEME="bureau"
 
 # load our own completion functions
 fpath=(~/.zsh/completion /usr/local/share/zsh/site-functions $fpath)
@@ -57,3 +57,12 @@ _load_settings "$HOME/.zsh/configs"
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 # aliases
 [[ -f ~/.aliases ]] && source ~/.aliases
+[[ -f ~/.zshrc.local.old ]] && source ~/.zshrc.local.old
+alias dm="docker-machine"
+alias dm="docker-machine"
+alias dco="docker-compose"
+export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
