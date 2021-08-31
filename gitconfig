@@ -8,9 +8,10 @@
 [core]
   excludesfile = ~/.gitignore
   autocrlf = input
-  editor = vim
+	editor = /usr/bin/vim
 [commit]
   template = ~/.gitmessage
+	gpgsign = true
 [fetch]
   prune = true
 [rebase]
@@ -19,3 +20,5 @@
   path = ~/.gitconfig.local
 [diff]
   colorMoved = zebra
+[user]
+	signingkey = 400D9D65916C2386
