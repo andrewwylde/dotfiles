@@ -11,14 +11,15 @@
 	editor = /usr/bin/vim
 [commit]
   template = ~/.gitmessage
-	gpgsign = true
+	gpgsign = false
 [fetch]
   prune = true
 [rebase]
   autosquash = true
+	autoStash = true
 [include]
   path = ~/.gitconfig.local
 [diff]
   colorMoved = zebra
-[user]
-	signingkey = 400D9D65916C2386
+[pull]
+	rebase = true
