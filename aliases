@@ -25,3 +25,18 @@ alias -- -="cd -"
 if [[ -f ~/.aliases.local ]]; then
   source ~/.aliases.local
 fi
+
+alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
+alias ea='editalias'
+alias scripts="cat package.json | jq .scripts | jq keys"
+alias gsta="git stash push --include-untracked"
+alias gpr="gupav"
+alias gcan="git commit --amend --no-edit"
+alias ezshl="e ~/.zshrc.local"
+alias ezsh="e ~/.zshrc"
+alias grh1="git reset HEAD~1"
+alias grboma="grbom --auto-stash"
+alias gcz="git cz"
+alias ezl="vim ~/.zshrc.local"
+alias szl="source ~/.zshrc.local"
+alias weather="curl 'wttr.in/Arlington+Heights?m'"
