@@ -10,7 +10,7 @@
 	editor = /usr/bin/vim
 [commit]
   template = ~/.gitmessage
-	gpgsign = false
+	gpgSign = true
 [fetch]
   prune = true
 [rebase]
@@ -22,3 +22,5 @@
   colorMoved = zebra
 [pull]
 	rebase = true
+[user]
+	signingKey = E13BB83EC0150CAA
