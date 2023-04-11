@@ -24,3 +24,10 @@
 	rebase = true
 [user]
 	signingKey = E13BB83EC0150CAA
+	name = Andrew Wylde
+	email = andrew.wylde@konghq.com
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
