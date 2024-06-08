@@ -10,7 +10,7 @@
 	editor = /usr/bin/vim
 [commit]
   template = ~/.gitmessage
-	gpgSign = true
+	gpgsign = true
 [fetch]
   prune = true
 [rebase]
@@ -31,3 +31,7 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[tag]
+	gpgsign = true
+[gitsign]
+	connectorID = https://github.com/login/oauth

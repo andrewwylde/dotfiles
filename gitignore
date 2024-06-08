@@ -14,3 +14,5 @@ log/*.log
 rerun.txt
 tmp/**/*
 /tags
+.python-version
+.vscode/
