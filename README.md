@@ -217,11 +217,18 @@ configuration:
 
 [Rails](https://rubyonrails.org)
 
-- Adds [railsrc][] with `--database=postgresql`. If you need to use another
-  database, you can override this value like so: `rails new my_app --database=mysql` or
-`rails new my_app --no_rc`
+- Adds [railsrc][] with the following options to integrate with [Suspenders][].
+
+```
+--database=postgresql
+--skip-test
+-m=https://raw.githubusercontent.com/thoughtbot/suspenders/main/lib/install/web.rb
+```
+
+If you want to skip this file altogether, run `rails new my_app --no_rc`.
 
 [railsrc]: https://github.com/rails/rails/blob/7f7f9df8641e35a076fe26bd097f6a1b22cb4e2d/railties/lib/rails/generators/rails/app/USAGE#L5C1-L7
+[Suspenders]: https://github.com/thoughtbot/suspenders
 
 Shell aliases and scripts:
 
@@ -295,16 +302,17 @@ in this project.
 
 ## License
 
-dotfiles is copyright © 2009-2018 thoughtbot. It is free software, and may be
+dotfiles is copyright © 2009 thoughtbot. It is free software, and may be
 redistributed under the terms specified in the [`LICENSE`] file.
 
 [`LICENSE`]: /LICENSE
 
+<!-- START /templates/footer.md -->
 ## About thoughtbot
 
-![thoughtbot](https://thoughtbot.com/brand_assets/93:44.svg)
+![thoughtbot](https://thoughtbot.com/thoughtbot-logo-for-readmes.svg)
 
-dotfiles is maintained and funded by thoughtbot, inc.
+This repo is maintained and funded by thoughtbot, inc.
 The names and logos for thoughtbot are trademarks of thoughtbot, inc.
 
 We love open source software!
@@ -313,3 +321,5 @@ We are [available for hire][hire].
 
 [community]: https://thoughtbot.com/community?utm_source=github
 [hire]: https://thoughtbot.com/hire-us?utm_source=github
+
+<!-- END /templates/footer.md -->
