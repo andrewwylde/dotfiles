@@ -8,6 +8,12 @@
   tool = opendiff
 [difftool]
   prompt = false
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+[commit]
+	gpgsign = true
 [user]
   name = Andrew Wylde
   email = andrew.wylde@konghq.com
