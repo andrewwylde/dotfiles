@@ -1,0 +1,5 @@
+.DS_Store
+**/.DS_Store
+**/node_modules/
+.cursor-managed-skills-manifest.json
+.sync-manifest.json

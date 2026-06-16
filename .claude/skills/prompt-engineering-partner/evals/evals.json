@@ -1,0 +1,23 @@
+{
+  "skill_name": "prompt-engineering-partner",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Intent: I have 3 branches: API, UI+API, and UI. The UI branch is baked on top of the wrong base, and needs to be updated based off of UI+API branch. I want the UI branch to contain two commits: 1. the squashed API commit, 2. The frontend-only code. At the end, I should have two PRs (API -> 'main' & UI -> API), with API needing review/merge first, then UI branch will auto-update to target `main`. The UI code needs to be reconciled between the two PRs that contain UI code. Branch names: feat/PARABLE-495 (API), feat/parable-495-merged (UI+API, source of truth for UI), feat/UI-188 (UI, currently broken). When UI code conflicts between the two source branches, prefer the merged branch version. Both PRs already exist; only the UI PR needs updating.",
+      "expected_output": "A self-contained, copy-paste-ready prompt for a fresh coding agent that will restack feat/UI-188 onto feat/PARABLE-495 with exactly 2 commits. Must include: concrete branch names inline, git diagnostic commands in 'What to read first', verifiable Definition of done items (git log checks, PR base check, compile check), the conflict-resolution rule as a Constraint, and a Scope Fidelity Ledger mapping every intent-spec item to a prompt section.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Intent: update all of my draft PRs that were waiting for EDR-0002 migration to happen. That work is finally done, and so now I need to update each PR separately to account for the new changes. The PRs are: #1095 (AppError WithCode), #1096 (SDK code propagation), #1097 (error-codes schema dep), #1101 (frontend error code toasts), #1102 (RFC 7807 wire format). They're currently closed/stale. Need to: rebase each onto current main, resolve conflicts using EDR-0011 intent + EDR-0002 as new baseline, de-stack so each targets main independently, reopen them. Don't merge anything. If conflict resolution requires business-logic judgment, leave a PR comment. Project has EDRs in docs/internal/edrs/.",
+      "expected_output": "A self-contained agent prompt that handles all 5 PRs together. Must include: the PR list with descriptions embedded in 'What to read first', EDR-0011 and EDR-0002 as first reads for intent/baseline, concrete gh CLI commands, de-stacking instruction, verifiable DoD (rebase cleanly, base=main via gh check, OPEN state), and a ledger. Should flag (under Scope Opinions) whether splitting #1102 into its own prompt would be safer, since its conflict surface is larger.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Intent: I want an agent prompt that takes in a single PR and outputs either a notion doc or takes no action. Context: this agent is spawned when a PR is created. The agent has access to linear, notion, and slack MCP tools. If the PR is relevant to me, I want to be notified. Relevance calculation: (1) PR author is me (Andrew Wylde); OR (2) PR title/body mentions my active linear issues (queryable via linear MCP); OR (3) PR modifies files in services I own (my owned paths: services/web-api/, apps/web-app/src/lib/domains/vendors/). If relevant: write a notion page in my Notes database (notion db url: https://www.notion.so/65b43a8d64584e95906dffa6f83d2df5) summarizing the PR, its relevance reason, and what action I should take. If not relevant: take no action and exit silently. Done looks like: agent produces a notion doc for relevant PRs only, silent exit otherwise. Out of scope: slack notifications (future work).",
+      "expected_output": "A self-contained agent prompt for a PR-relevance-evaluator agent. Must include: all 3 relevance criteria with the exact user name and paths, the Notion DB URL, the silent-exit behavior for non-relevant PRs, the explicit 'out of scope: slack' note, verifiable DoD items, and a ledger showing how each criterion and the out-of-scope item is mapped. Should note assumptions (e.g., which linear query returns 'my active issues' — status filters).",
+      "files": []
+    }
+  ]
+}

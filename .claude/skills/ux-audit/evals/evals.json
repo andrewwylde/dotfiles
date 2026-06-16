@@ -1,0 +1,53 @@
+{
+  "skill_name": "ux-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run a UX audit on https://news.ycombinator.com",
+      "expected_output": "A graded markdown report covering interaction patterns, performance perception, and accessibility with specific issues and fixes",
+      "files": [],
+      "assertions": [
+        { "id": "structured-template", "text": "Report contains Summary, Grades table, all 3 category sections, and Priority Fixes" },
+        { "id": "letter-grades", "text": "Overall letter grade (A-F) and per-category grades are present" },
+        { "id": "numeric-scores", "text": "Numeric scores out of 100 for overall and each category" },
+        { "id": "severity-labels", "text": "Each issue labeled Critical, Major, or Minor" },
+        { "id": "actionable-fixes", "text": "Issues include specific fix recommendations" },
+        { "id": "positives-included", "text": "What's Working Well sections are present" },
+        { "id": "uses-browser-data", "text": "References specific metrics, axe-core findings, or screenshot observations" },
+        { "id": "calibrated-grade-hn", "text": "Overall grade is C or below" }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit the UX of https://linear.app",
+      "expected_output": "A graded markdown report that fairly evaluates a well-polished SPA, identifying both strengths and areas for improvement",
+      "files": [],
+      "assertions": [
+        { "id": "structured-template", "text": "Report contains Summary, Grades table, all 3 category sections, and Priority Fixes" },
+        { "id": "letter-grades", "text": "Overall letter grade (A-F) and per-category grades are present" },
+        { "id": "numeric-scores", "text": "Numeric scores out of 100 for overall and each category" },
+        { "id": "severity-labels", "text": "Each issue labeled Critical, Major, or Minor" },
+        { "id": "actionable-fixes", "text": "Issues include specific fix recommendations" },
+        { "id": "positives-included", "text": "What's Working Well sections are present" },
+        { "id": "uses-browser-data", "text": "References specific metrics, axe-core findings, or screenshot observations" },
+        { "id": "calibrated-grade-linear", "text": "Overall grade is B or above" }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "How's the UX on https://www.craigslist.org",
+      "expected_output": "A graded markdown report that catches obvious UX issues on a notoriously rough site, triggered by casual phrasing",
+      "files": [],
+      "assertions": [
+        { "id": "structured-template", "text": "Report contains Summary, Grades table, all 3 category sections, and Priority Fixes" },
+        { "id": "letter-grades", "text": "Overall letter grade (A-F) and per-category grades are present" },
+        { "id": "numeric-scores", "text": "Numeric scores out of 100 for overall and each category" },
+        { "id": "severity-labels", "text": "Each issue labeled Critical, Major, or Minor" },
+        { "id": "actionable-fixes", "text": "Issues include specific fix recommendations" },
+        { "id": "positives-included", "text": "What's Working Well sections are present" },
+        { "id": "uses-browser-data", "text": "References specific metrics, axe-core findings, or screenshot observations" },
+        { "id": "calibrated-grade-craigslist", "text": "Overall grade is D or below" }
+      ]
+    }
+  ]
+}
