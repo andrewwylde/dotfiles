@@ -52,7 +52,60 @@ to link any new files and install new vim plugins. **Note** You _must_ run
 `rcup` after pulling to ensure that all files in plugins are properly installed,
 but you can safely run `rcup` multiple times so update early and update often!
 
-## Make your own customizations
+but you can safely run `rcup` multiple times so update early and update often!
+
+Claude Code and Cursor (agents, skills, commands)
+-------------------------------------------------
+
+Custom agents, skills, and slash commands are versioned under:
+
+* `.claude/agents`, `.claude/skills`, `.claude/commands`
+* `.cursor/agents`, `.cursor/skills`, `.cursor/skills-cursor`, `.cursor/commands`
+
+`rcup` does not symlink these trees (only the parent `~/.claude` / `~/.cursor`
+dirs hold machine-local state). After install or pull, sync them:
+
+    ~/dotfiles/bin/sync-ai-assistants
+
+`hooks/post-up` runs this automatically at the end of `rcup`. On a new machine,
+existing directories are merged into dotfiles once, then replaced with symlinks.
+
+Verify symlinks:
+
+    ~/dotfiles/bin/sync-ai-assistants --verify
+
+Dry run:
+
+    ~/dotfiles/bin/sync-ai-assistants --dry-run
+
+Before pushing to the public remote, run the leak check:
+
+    ~/dotfiles/bin/leak-check.sh
+
+Parable-specific skills and scripts stay local (see `.gitignore`). Put
+work-only overrides in `~/dotfiles-local/.claude/skills/` on each machine.
+
+WSL setup (Windows)
+-------------------
+
+Use WSL2 with the repo cloned under the Linux home directory (not `/mnt/c/`):
+
+    git clone https://github.com/andrewwylde/dotfiles.git ~/dotfiles
+    cd ~/dotfiles
+    sudo apt install zsh git rcm
+    chsh -s "$(which zsh)"
+    env RCRC=$HOME/dotfiles/rcrc rcup
+    ~/dotfiles/bin/sync-ai-assistants --verify
+
+Create `~/dotfiles-local/gitconfig.local` for your identity, GPG, and any
+Windows/WSL-specific paths. Open projects from the WSL path in Cursor
+(`\\wsl$\...`) so `~/.cursor/skills` symlinks resolve correctly.
+
+Shell scripts and `sync-ai-assistants` use bash and `ln -sfn` and work on
+macOS and WSL. Homebrew-specific zsh config is skipped outside macOS.
+
+Make your own customizations
+----------------------------
 
 Create a directory for your personal customizations:
 

@@ -2,5 +2,66 @@
 vim/bundle/
 zsh/
 git_template/
-bin/
+
+# Keep most of bin/ ignored, but allow explicit scripts to be tracked.
+bin/*
+!bin/install-commitizen
+!bin/sync-ai-assistants
+!bin/leak-check.sh
+!bin/git-*
+
 .git/
+
+# Machine-local git identity and signing (use ~/dotfiles-local/gitconfig.local via rcup)
+gitconfig.local
+
+# Parable worktree bootstrap — local only
+config/parable/
+
+# Skill eval artifacts and bulky deps
+**/*-workspace/
+**/*.zip
+**/node_modules/
+**/.temp-execution-*
+
+# Parable-specific skills (.claude)
+.claude/skills/parable-product-review/
+.claude/skills/parable-pr-swarm/
+.claude/skills/parable-worktree-repo-hooks/
+.claude/skills/arch-review/
+.claude/skills/classification-local-e2e/
+.claude/skills/create-migration/
+.claude/skills/deploy-release-notes/
+.claude/skills/flesh-out-ticket/
+.claude/skills/gap-analysis/
+.claude/skills/psgen-workflow/
+.claude/skills/pr-flow-video/
+.claude/skills/seed-tts-data/
+.claude/skills/switch-db/
+.claude/skills/ticket-router/
+.claude/skills/tts-state-restore/
+.claude/skills/worktree-snapshot/
+.claude/skills/swarm-review/
+.claude/skills/swarm-test-review/
+
+# Parable-specific agents (.claude)
+.claude/agents/connector-specialist.md
+.claude/agents/e2e-debugger.md
+.claude/agents/migration-reviewer.md
+.claude/agents/parable-security-reviewer.md
+.claude/agents/psgen-reviewer.md
+.claude/agents/spectacles-validator.md
+.claude/agents/tts-debugger.md
+.claude/agents/release-coordinator.md
+
+# Parable-specific commands (.claude)
+.claude/commands/add-experiment-note.md
+.claude/commands/daily-plan.md
+.claude/commands/implement-and-review-loop.md
+
+# Parable-specific commands (.cursor)
+.cursor/commands/implement-and-review-loop.md
+
+# Parable zsh helpers — local only
+zsh/configs/parable-platform.zsh
+zsh/functions/parable-auth.zsh

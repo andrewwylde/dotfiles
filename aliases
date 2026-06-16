@@ -9,7 +9,6 @@ alias v="$VISUAL"
 alias b="bundle"
 
 # Rails
-alias migrate="bin/rails db:migrate db:rollback && bin/rails db:migrate db:test:prepare"
 alias s="rspec"
 
 # Pretty print the path
@@ -25,3 +24,57 @@ alias -- -="cd -"
 if [[ -f ~/.aliases.local ]]; then
   source ~/.aliases.local
 fi
+
+alias ports='lsof -iTCP -sTCP:LISTEN -n -P'
+alias ea='editalias'
+alias scripts="cat package.json | jq .scripts | jq keys"
+alias gsta="git stash push --include-untracked"
+alias gpr="gupav"
+alias gcan="git commit --amend --no-edit"
+alias ezshl="e ~/.zshrc.local"
+alias ezsh="e ~/.zshrc"
+alias grh1="git reset HEAD~1"
+alias grboma="grbom --auto-stash"
+alias gcz="git cz commit"
+alias ezl="vim ~/.zshrc.local"
+alias szl="source ~/.zshrc.local"
+alias weather="curl 'wttr.in/Arlington+Heights?m'"
+
+# uv (Python package manager)
+alias uva="uv add"
+alias uvrm="uv remove"
+alias uvs="uv sync"
+alias uvr="uv run"
+alias uvpl="uv pip list"
+alias uvpf="uv pip freeze"
+alias uvpi="uv pip install"
+alias uvvenv="uv venv"
+alias uvpy="uv python"
+
+# Docker
+alias dcf="docker-compose -f docker-compose.yml"
+
+# Go
+alias goti="go test -tags=integration"
+alias gotc="go clean -testcache"
+
+# Git
+alias gpf="gp -f origin"
+alias grs="git restore --staged"
+alias gcnv="git commit --no-verify"
+
+# Node / Turborepo
+alias nr="npm run"
+alias nrc="npm run check"
+alias nre2e="npm run test:e2e"
+alias turbo="npx turbo run"
+alias prettier="npx prettier"
+
+# Run a command in a monorepo subdirectory: pp services/web-api go test ./...
+pp() { (cd "$1" && shift && eval "$@"); }
+
+# .env.local symlink switchers
+use-dev()  { ln -sf .env.local-dev .env.local; }
+use-local(){ ln -sf .env.local-local .env.local; }
+
+alias dangerclaude="claude --dangerously-skip-permissions"

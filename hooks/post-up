@@ -1,5 +1,13 @@
 #!/bin/sh
 
+if [ -x "$HOME/dotfiles-local/bin/sync-ai-assistants" ]; then
+  DOTFILES_DIR="$HOME/dotfiles-local" "$HOME/dotfiles-local/bin/sync-ai-assistants" \
+    || echo "sync-ai-assistants failed (see above)" >&2
+elif [ -x "$HOME/dotfiles/bin/sync-ai-assistants" ]; then
+  DOTFILES_DIR="$HOME/dotfiles" "$HOME/dotfiles/bin/sync-ai-assistants" \
+    || echo "sync-ai-assistants failed (see above)" >&2
+fi
+
 touch "$HOME"/.psqlrc.local
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
