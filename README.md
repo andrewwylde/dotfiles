@@ -85,24 +85,41 @@ Before pushing to the public remote, run the leak check:
 Parable-specific skills and scripts stay local (see `.gitignore`). Put
 work-only overrides in `~/dotfiles-local/.claude/skills/` on each machine.
 
-WSL setup (Windows)
--------------------
+Platform setup scripts
+----------------------
 
-Use WSL2 with the repo cloned under the Linux home directory (not `/mnt/c/`):
+Run **one entry point**; it picks the right platform script:
 
+    ./setup.sh          # macOS, WSL, or Git Bash on Windows
+
+    # Native Windows PowerShell:
+    .\setup.ps1
+
+| Routed script | Platform |
+|---------------|----------|
+| `mac-setup.sh` | macOS |
+| `wsl-setup.sh` | WSL / Linux |
+| `windows-setup.ps1` | Windows host (via `setup.ps1`) |
+
+**Typical flows:**
+
+    # macOS
     git clone https://github.com/andrewwylde/dotfiles.git ~/dotfiles
+    cd ~/dotfiles && ./setup.sh
+
+    # Windows → WSL
     cd ~/dotfiles
-    sudo apt install zsh git rcm
-    chsh -s "$(which zsh)"
-    env RCRC=$HOME/dotfiles/rcrc rcup
-    ~/dotfiles/bin/sync-ai-assistants --verify
+    .\setup.ps1
+    # or, after WSL is ready: ./setup.sh inside Ubuntu
 
-Create `~/dotfiles-local/gitconfig.local` for your identity, GPG, and any
-Windows/WSL-specific paths. Open projects from the WSL path in Cursor
-(`\\wsl$\...`) so `~/.cursor/skills` symlinks resolve correctly.
+`wsl-setup.sh` writes identity to `~/dotfiles-local/gitconfig.local` and runs
+`rcup` for you. Put any other machine-only overrides there too.
 
-Shell scripts and `sync-ai-assistants` use bash and `ln -sfn` and work on
-macOS and WSL. Homebrew-specific zsh config is skipped outside macOS.
+On macOS, `mac-setup.sh` installs tools first; run `rcup` afterward if the
+script did not already (or re-run `./setup.sh` after editing dotfiles).
+
+Open projects from the WSL path in Cursor (`\\wsl$\...`) so `~/.cursor/skills`
+symlinks resolve correctly. Homebrew-specific zsh config is skipped outside macOS.
 
 Make your own customizations
 ----------------------------
