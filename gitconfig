@@ -8,17 +8,22 @@
 [core]
   excludesfile = ~/.gitignore
   autocrlf = input
-	editor = /usr/bin/vim
+  editor = /usr/bin/vim
 [commit]
   template = ~/.gitmessage
-	gpgsign = true
+  gpgSign = true
 [fetch]
   prune = true
 [rebase]
   autosquash = true
+[pull]
+  rebase = true
 [include]
   path = ~/.gitconfig.local
 [diff]
   colorMoved = zebra
-[user]
-	signingkey = 400D9D65916C2386
+[alias]
+  lg = log --graph --all --decorate --oneline
+  st = status
+  co = checkout
+  clean-safe = clean -dfx -e .env*

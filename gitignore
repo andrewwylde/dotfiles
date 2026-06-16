@@ -9,8 +9,14 @@
 /log
 /node_modules/
 /tmp
+/vendor
 db/*.sqlite3
 log/*.log
 rerun.txt
 tmp/**/*
 /tags
+
+.github/instructions
+
+# Machine-local git config (rcup: ~/dotfiles-local/gitconfig.local)
+gitconfig.local
