@@ -23,7 +23,7 @@ dotfiles_dir() {
     return 0
   fi
   local d
-  for d in "${HOME}/dotfiles-local" "${HOME}/dotfiles"; do
+  for d in "${HOME}/dotfiles" "${HOME}/dotfiles-local"; do
     if [[ -d "${d}" ]]; then
       printf '%s\n' "${d}"
       return 0
