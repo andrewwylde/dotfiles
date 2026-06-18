@@ -56,7 +56,6 @@ config/parable/
 
 # Parable-specific commands (.claude)
 .claude/commands/add-experiment-note.md
-.claude/commands/daily-plan.md
 .claude/commands/implement-and-review-loop.md
 
 # Parable-specific commands (.cursor)
