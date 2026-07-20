@@ -72,10 +72,20 @@ Replace `<CUTOFF_ISO>` with the actual cutoff ISO string and `<SEEN_JSON>` with 
 
 The script outputs `{"prs": [...], "seen_prs": {...}}`. Save `seen_prs` from the output -- it will be persisted in Step 7.
 
-**Three-tier PR inclusion rules:**
-1. **Explicit**: `andrew-parable` is a direct reviewer -- always include regardless of paths or age.
-2. **Team + overlap**: team slug (`platform`, `product-engineering`) is a reviewer AND PR touches `services/web-api/`, `services/web-admin-api/`, or `apps/web-app/` -- include.
-3. **Overlap only**: no review request, but touches overlap paths and updated since cutoff -- include as awareness.
+**This script is the only source for the PR Review Queue.** Do not supplement with `gh search prs --review-requested` or similar search APIs. GitHub search returns stale or historical review requests (e.g. SAML, CICDv2, authoring WIP) that are not on the PR's current `reviewRequests` list.
+
+**Two-tier PR inclusion rules (filter_prs.py):**
+1. **Explicit**: `andrew-parable` is on the PR's current `reviewRequests` -- include regardless of paths.
+2. **Team + overlap**: `platform` or `product-engineering` is a reviewer AND PR touches `services/web-api/`, `services/web-admin-api/`, or `apps/web-app/` -- include only if not in an excluded lane (below).
+
+**Excluded lanes (team tier only; explicit reviewer bypasses):**
+| Class | Examples | Why excluded |
+|-------|----------|--------------|
+| chore/deps | dependabot consolidations, `chore(deps):` | platform hygiene, not Andrew's review lane |
+| CI/tooling | affected Go modules, daily CI runner, `.github/`, `scripts/ci/` | platform CI ownership |
+| infra/docs | `infrastructure/`, `docs(edr):`, `docs/internal/` | outside web-app/API product surface |
+
+**No awareness tier.** PRs that only touch overlap paths without a current review request are noise -- omit entirely.
 
 **Staleness handling in synthesis (Step 5):**
 - `days_carried == 0`: new since last check -- show first in queue
@@ -106,12 +116,15 @@ Note any blockers mentioned in recent comments or issue descriptions (look for k
 
 ## Step 4: Gather Slack Activity
 
-Read recent messages from these channels since the last check:
+Read recent messages from these channels since the last check.
+
+Rationale: morning digest should surface threads that shape today's product/apps work — not security-alert noise. Prefer eng pulse, apps/UI, TTS squad, platform/API, and design.
 
 - `#tech-general`
-- `#tech-security`
-- `#squad-team-time-spend`
 - `#guild-apps`
+- `#squad-team-time-spend`
+- `#guild-platform`
+- `#product-design`
 
 For each channel:
 
@@ -120,9 +133,9 @@ For each channel:
 3. Summarize: key discussions, decisions made, questions asked, anything requiring the user's attention or input.
 4. Flag any messages that directly mention or are relevant to the user's active Linear tickets.
 
-If a channel cannot be found, skip it and note the skip in the output.
+If a channel cannot be found or history fails (missing OAuth scopes, bot not in channel), skip it and add one footnote in the Slack Digest: "Slack history unavailable (integration)." Do not add MCP scope fixes to Task Log or Tomorrow Problems -- that is integration config, not daily work.
 
-To speed things up, search for all four channels in parallel if possible — the channel lookups are independent of each other.
+To speed things up, search for all five channels in parallel if possible -- the channel lookups are independent of each other.
 
 ---
 
@@ -134,7 +147,7 @@ From the gathered data, produce these sections:
 Derived from: highest priority Linear issues in "In Progress", any PRs with requested reviews, any Slack threads needing response. Frame as "what would make today successful."
 
 ### PR Review Queue
-Ordered list of PRs to review: PR number, title, author, why it's relevant (requested reviewer / touches your code), size estimate (S/M/L/XL).
+Ordered list from `filter_prs.py` output only (`category` = `explicit` or `team_overlap`). PR number, title, author, why it's relevant (`explicit` vs `team_overlap`), size (S/M/L/XL). Target 2-5 items; if more, keep explicit first, then team_overlap by recency.
 
 ### Ticket Progress Summary
 Each active Linear ticket: ID, title, current status, what happened since last check (new comments, status changes), next action needed.
@@ -276,7 +289,7 @@ Output to the user:
 
 1. **Notion journal link** (if created) or note that markdown was output instead
 2. **Draft Slack status message** — formatted and ready to copy-paste. Remind the user this was NOT sent.
-3. **Brief summary**: PR count to review, active ticket count, notable Slack activity highlights
+3. **Brief summary**: PR count in review queue (from filter script only), active ticket count, notable Slack activity highlights. Do not report total open PRs or stale search hits.
 4. **Link to previous journal** (from the loaded timestamp file, if it existed)
 
 End with a note like: "Draft status message is ready to copy-paste — it has not been sent. Edit your Notion journal throughout the day."
