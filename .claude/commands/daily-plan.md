@@ -52,23 +52,24 @@ Store the cutoff as both an ISO-8601 string and a Unix epoch timestamp (Slack to
 
 ## Step 2: Gather GitHub PR Context
 
-Fetch raw PR data to a temp file, then run the persistent filter script:
+Fetch raw PR data to a temp file, then run the versioned filter script from this repo:
 
 ```bash
 gh pr list --repo parable-work/parable-platform --state open \
   --json number,title,author,files,reviewRequests,updatedAt,url,additions,deletions \
   > /tmp/prs_raw.json
 
-# Recreate filter script if missing
-[ -f ~/.agent/scripts/filter_prs.py ] || mkdir -p ~/.agent/scripts && \
-  cp /dev/null ~/.agent/scripts/filter_prs.py  # placeholder; will be written by improve-skill
+FILTER_PRS="${DOTFILES:-$HOME/dotfiles}/.claude/commands/scripts/filter_prs.py"
+# Optional compat symlink for older paths: ~/.agent/scripts/filter_prs.py -> $FILTER_PRS
 
 TODAY=$(date +%Y-%m-%d)
 SEEN='<SEEN_JSON>'  # substitute the seen_prs JSON string from Step 1 (use '{}' if empty)
-python3 ~/.agent/scripts/filter_prs.py '<CUTOFF_ISO>' "$SEEN" "$TODAY" /tmp/prs_raw.json
+python3 "$FILTER_PRS" '<CUTOFF_ISO>' "$SEEN" "$TODAY" /tmp/prs_raw.json
 ```
 
 Replace `<CUTOFF_ISO>` with the actual cutoff ISO string and `<SEEN_JSON>` with the `seen_prs` object from last-check.json (JSON-encoded, single-quoted or written to a temp var).
+
+The script lives at [`.claude/commands/scripts/filter_prs.py`](scripts/filter_prs.py). Runtime state (`last_check`, `seen_prs`) stays in `~/.agent/daily-plan-last-check.json`.
 
 The script outputs `{"prs": [...], "seen_prs": {...}}`. Save `seen_prs` from the output -- it will be persisted in Step 7.
 
