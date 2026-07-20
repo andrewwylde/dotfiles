@@ -162,14 +162,23 @@ Per-channel summary of notable activity since last check. Threads requiring resp
 Open questions surfaced from Slack threads, PR comments, or Linear ticket comments that need the user's input.
 
 ### Draft Slack Status Message
-Short bullets categorized by ticket. Under 200 words. Blockers and questions highlighted at the top or with a distinct marker.
+Short bullets categorized by ticket / PR. Under 200 words. Blockers and questions highlighted at the top or with a distinct marker.
+
+**PR links are required.** Every PR mentioned must use Slack mrkdwn so paste stays clickable:
+
+```
+<https://github.com/parable-work/parable-platform/pull/NNNN|#NNNN short title>
+```
+
+Do not use bare `#NNNN` alone or markdown `[text](url)` — those do not paste as Slack links. Include review-queue PRs and own open shepherding PRs when they appear in the update.
 
 Format example:
 ```
 Morning update:
 * PARABLE-583: continuing schema-defined time spend routes, targeting PR today
 * POV-548: DB schema for admin config -- need input on [specific question]
-* PR reviews: #1542 (connector auth), #1538 (migration fix)
+* PR reviews: <https://github.com/parable-work/parable-platform/pull/1542|#1542 connector auth>, <https://github.com/parable-work/parable-platform/pull/1538|#1538 migration fix>
+* Shipping: <https://github.com/parable-work/parable-platform/pull/4795|#4795 Docker types>
 * Blocker: waiting on [X] for [Y]
 ```
 
@@ -249,9 +258,21 @@ Create a new page using the data source ID as the parent.
 ### Tomorrow Problems
 
 - [ ] [anything identified as not-today but needs attention soon]
+
+---
+
+### Draft Slack status
+
+*(not sent — copy the fenced block into Slack; use Slack mrkdwn links)*
+
+~~~
+[paste the same Draft Slack Status Message from Step 5 here, with <url|#NNNN title> links for every PR]
+~~~
 ```
 
 Pre-fill what you can from the gathered data. Leave user-reflective sections (energy/mood, what feels easy, midday/end-of-day) blank for the user to fill manually.
+
+**Always write the Draft Slack status section into the Notion page** (same copy-paste body as Step 5 / Step 8), with Slack mrkdwn GitHub links for every PR mentioned.
 
 Capture the URL of the created Notion page for the timestamp file and final output.
 
@@ -291,7 +312,7 @@ Include `notion_data_source_id` so subsequent runs skip the discovery fetch. Cre
 Output to the user:
 
 1. **Notion journal link** (if created) or note that markdown was output instead
-2. **Draft Slack status message** — formatted and ready to copy-paste. Remind the user this was NOT sent.
+2. **Draft Slack status message** — formatted and ready to copy-paste, with Slack mrkdwn GitHub links (`<url|#NNNN title>`) for every PR. Remind the user this was NOT sent. Confirm the same draft was written into the Notion journal under **Draft Slack status**.
 3. **Brief summary**: PR count in review queue (from filter script only), active ticket count, notable Slack activity highlights. Do not report total open PRs or stale search hits.
 4. **Link to previous journal** (from the loaded timestamp file, if it existed)
 
