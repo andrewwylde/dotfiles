@@ -78,6 +78,8 @@ The script outputs `{"prs": [...], "seen_prs": {...}}`. Save `seen_prs` from the
 1. **Explicit**: `andrew-parable` is on the PR's current `reviewRequests` -- include regardless of paths.
 2. **Team + overlap**: `platform` or `product-engineering` is a reviewer AND PR touches `services/web-api/`, `services/web-admin-api/`, or `apps/web-app/` -- include only if not in an excluded lane (below).
 
+**Always exclude own-authored PRs** (`author.login == andrew-parable`). Those belong in Task Log as shepherding items, not the PR Review Queue.
+
 **Excluded lanes (team tier only; explicit reviewer bypasses):**
 | Class | Examples | Why excluded |
 |-------|----------|--------------|
