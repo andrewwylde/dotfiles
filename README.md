@@ -57,33 +57,28 @@ but you can safely run `rcup` multiple times so update early and update often!
 Claude Code and Cursor (agents, skills, commands)
 -------------------------------------------------
 
-Custom agents, skills, and slash commands are versioned under:
+Canonical Library lives under `library/{skills,commands,agents,hooks}/`.
+Fan-out to Claude Code, Cursor, OpenCode, and Pi with:
 
-* `.claude/agents`, `.claude/skills`, `.claude/commands`
-* `.cursor/agents`, `.cursor/skills`, `.cursor/skills-cursor`, `.cursor/commands`
+    ~/dotfiles/bin/agent-sync sync
+    ~/dotfiles/bin/agent-sync verify
+    ~/dotfiles/bin/agent-sync list
+    ~/dotfiles/bin/agent-sync migrate --dry-run
+    ~/dotfiles/bin/agent-sync migrate --write
 
-`rcup` does not symlink these trees (only the parent `~/.claude` / `~/.cursor`
-dirs hold machine-local state). After install or pull, sync them:
+Build (setup scripts do this too):
 
-    ~/dotfiles/bin/sync-ai-assistants
+    (cd ~/dotfiles/agent-sync && cargo build --release)
+    cp target/release/agent-sync ~/.local/bin/agent-sync
 
-`hooks/post-up` runs this automatically at the end of `rcup`. On a new machine,
-existing directories are merged into dotfiles once, then replaced with symlinks.
-
-Verify symlinks:
-
-    ~/dotfiles/bin/sync-ai-assistants --verify
-
-Dry run:
-
-    ~/dotfiles/bin/sync-ai-assistants --dry-run
-
-Before pushing to the public remote, run the leak check:
-
-    ~/dotfiles/bin/leak-check.sh
+`hooks/post-up` runs `agent-sync sync` after `rcup`. Legacy
+`bin/sync-ai-assistants` is a shim that prefers agent-sync, then falls back to
+`bin/sync-ai-assistants.legacy` (symlink installer) during migration.
 
 Parable-specific skills and scripts stay local (see `.gitignore`). Put
-work-only overrides in `~/dotfiles-local/.claude/skills/` on each machine.
+work-only overrides in `~/dotfiles-local/library/` on each machine.
+
+See `agent-sync/README.md`, `CONTEXT.md`, and `.taskmaster/docs/wayfinder-agent-sync-map.md`.
 
 Platform setup scripts
 ----------------------
@@ -130,9 +125,9 @@ Create a directory for your personal customizations:
 
 Put your customizations in `~/dotfiles-local` appended with `.local`:
 
+- `~/dotfiles-local/gitconfig.local` — identity, 1Password SSH commit signing, credentials
 - `~/dotfiles-local/aliases.local`
 - `~/dotfiles-local/git_template.local/*`
-- `~/dotfiles-local/gitconfig.local`
 - `~/dotfiles-local/psqlrc.local` (we supply a blank `.psqlrc.local` to prevent `psql` from
   throwing an error, but you should overwrite the file with your own copy)
 - `~/dotfiles-local/tmux.conf.local`
@@ -148,13 +143,15 @@ For example, your `~/dotfiles-local/aliases.local` might look like this:
 
 Your `~/dotfiles-local/gitconfig.local` might look like this:
 
-    [alias]
-      l = log --pretty=colored
-    [pretty]
-      colored = format:%Cred%h%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset
     [user]
       name = Dan Croak
       email = dan@thoughtbot.com
+
+For 1Password SSH commit signing on macOS, also set `gpg.format = ssh`,
+`gpg.ssh.program` to 1Password's `op-ssh-sign`, and `user.signingkey` to your
+SSH public key. After removing tracked `gitconfig.local` from the repo, ensure
+`~/.gitconfig.local` points at `~/dotfiles-local/gitconfig.local` (run `rcup`,
+or `ln -sf ~/dotfiles-local/gitconfig.local ~/.gitconfig.local`).
 
 Your `~/dotfiles-local/vimrc.local` might look like this:
 

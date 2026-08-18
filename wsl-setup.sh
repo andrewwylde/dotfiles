@@ -200,6 +200,7 @@ main() {
   install_oh_my_zsh
   clone_dotfiles
   ensure_dotfiles_local_gitconfig
+  install_agent_sync "${DOTFILES_DIR}"
   run_rcup "${DOTFILES_DIR}"
   run_sync_ai_assistants "${DOTFILES_DIR}"
   set_default_zsh

@@ -88,17 +88,25 @@ ensure_dotfiles_local_gitconfig() {
 
   if [[ -f "$gitconfig_local" ]]; then
     log_info "Keeping existing ${gitconfig_local}"
-    return 0
-  fi
+  else
+    prompt_for_git_identity
 
-  prompt_for_git_identity
-
-  cat >"$gitconfig_local" <<EOF
+    cat >"$gitconfig_local" <<EOF
 [user]
   name = ${FULL_NAME}
   email = ${GIT_EMAIL}
 EOF
-  log_info "Wrote ${gitconfig_local}"
+    log_info "Wrote ${gitconfig_local}"
+  fi
+
+  # Base gitconfig includes ~/.gitconfig.local; rcup should symlink this from
+  # dotfiles-local, but repair explicitly if the link still points at the removed
+  # ~/dotfiles/gitconfig.local path.
+  if [[ ! -e "${HOME}/.gitconfig.local" ]] \
+    || [[ "$(readlink "${HOME}/.gitconfig.local" 2>/dev/null)" == "${HOME}/dotfiles/gitconfig.local" ]]; then
+    ln -sf "$gitconfig_local" "${HOME}/.gitconfig.local"
+    log_info "Linked ~/.gitconfig.local -> ${gitconfig_local}"
+  fi
 }
 
 run_rcup() {
@@ -112,15 +120,71 @@ run_rcup() {
   env RCRC="${dotfiles_dir}/rcrc" rcup
 }
 
-run_sync_ai_assistants() {
+# Prefer GitHub Release binary, else cargo build --release. Soft-fail.
+install_agent_sync() {
   local dotfiles_dir="$1"
-  local sync="${dotfiles_dir}/bin/sync-ai-assistants"
-  if [[ ! -x "$sync" ]]; then
-    log_warn "sync-ai-assistants not found at ${sync}; skipping"
+  local crate="${dotfiles_dir}/agent-sync"
+  local dest="${HOME}/.local/bin/agent-sync"
+  mkdir -p "${HOME}/.local/bin"
+
+  if [[ ! -d "${crate}" ]]; then
+    log_warn "agent-sync crate missing at ${crate}; skipping install"
     return 0
   fi
 
-  log_info "Syncing Claude/Cursor harness..."
+  if command_exists cargo; then
+    log_info "Building agent-sync (release)..."
+    if (cd "${crate}" && cargo build --release --quiet); then
+      cp -f "${crate}/target/release/agent-sync" "${dest}"
+      chmod +x "${dest}"
+      log_info "Installed ${dest}"
+      return 0
+    fi
+    log_warn "cargo build --release failed for agent-sync"
+  else
+    log_warn "cargo not found; cannot build agent-sync (install Rust or download a Release asset)"
+  fi
+  return 0
+}
+
+run_agent_sync() {
+  local dotfiles_dir="$1"
+  local verify="${2:-0}"
+  local bin=""
+  if [[ -x "${HOME}/.local/bin/agent-sync" ]]; then
+    bin="${HOME}/.local/bin/agent-sync"
+  elif [[ -x "${dotfiles_dir}/bin/agent-sync" ]]; then
+    bin="${dotfiles_dir}/bin/agent-sync"
+  elif [[ -x "${dotfiles_dir}/agent-sync/target/release/agent-sync" ]]; then
+    bin="${dotfiles_dir}/agent-sync/target/release/agent-sync"
+  fi
+  if [[ -z "${bin}" ]]; then
+    log_warn "agent-sync binary not found; skipping sync"
+    return 0
+  fi
+  log_info "Running agent-sync sync..."
+  DOTFILES_DIR="${dotfiles_dir}" "${bin}" sync || log_warn "agent-sync sync failed"
+  if [[ "${verify}" == "1" ]]; then
+    DOTFILES_DIR="${dotfiles_dir}" "${bin}" verify || log_warn "agent-sync verify failed"
+  fi
+}
+
+# Legacy name — prefer agent-sync; fall back to symlink installer during transition.
+run_sync_ai_assistants() {
+  local dotfiles_dir="$1"
+  if [[ -x "${HOME}/.local/bin/agent-sync" ]] \
+    || [[ -x "${dotfiles_dir}/bin/agent-sync" ]] \
+    || [[ -x "${dotfiles_dir}/agent-sync/target/release/agent-sync" ]]; then
+    run_agent_sync "${dotfiles_dir}" 1
+    return 0
+  fi
+  local sync="${dotfiles_dir}/bin/sync-ai-assistants"
+  if [[ ! -x "$sync" ]]; then
+    log_warn "neither agent-sync nor sync-ai-assistants found; skipping"
+    return 0
+  fi
+
+  log_info "Syncing Claude/Cursor harness (legacy sync-ai-assistants)..."
   DOTFILES_DIR="$dotfiles_dir" "$sync"
   DOTFILES_DIR="$dotfiles_dir" "$sync" --verify
 }

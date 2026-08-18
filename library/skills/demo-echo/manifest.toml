@@ -1,0 +1,12 @@
+# PROTOTYPE — library/skills/demo-echo
+# Opt-in Manifest. Missing Manifest = all valid Targets, no overlay.
+# Library dir stays unprefixed; Fan-out basename is andrew-demo-echo.
+
+[overlays.cursor]
+body_append = """
+
+<!-- cursor overlay: Target-only note. Not in the Library body. -->
+"""
+
+[overlays.cursor.frontmatter]
+disable-model-invocation = true
