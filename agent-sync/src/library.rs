@@ -1,0 +1,273 @@
+use std::collections::BTreeMap;
+use std::fmt;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use anyhow::{Context, Result};
+
+use crate::config::Config;
+use crate::manifest::Manifest;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Kind {
+    Skills,
+    Commands,
+    Agents,
+    Hooks,
+}
+
+impl Kind {
+    pub const ALL: [Self; 4] = [Self::Skills, Self::Commands, Self::Agents, Self::Hooks];
+
+    #[must_use]
+    pub const fn dir_name(self) -> &'static str {
+        match self {
+            Self::Skills => "skills",
+            Self::Commands => "commands",
+            Self::Agents => "agents",
+            Self::Hooks => "hooks",
+        }
+    }
+
+    #[must_use]
+    pub const fn source_file(self) -> Option<&'static str> {
+        match self {
+            Self::Skills => Some("SKILL.md"),
+            Self::Commands => Some("COMMAND.md"),
+            Self::Agents => Some("AGENT.md"),
+            Self::Hooks => None,
+        }
+    }
+}
+
+impl fmt::Display for Kind {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.dir_name())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ItemSource {
+    Public,
+    Local,
+}
+
+impl fmt::Display for ItemSource {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Public => formatter.write_str("public"),
+            Self::Local => formatter.write_str("local"),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct LibraryItem {
+    pub kind: Kind,
+    pub name: String,
+    pub vendor_origin: Option<String>,
+    pub path: PathBuf,
+    pub source: ItemSource,
+    pub manifest: Manifest,
+}
+
+impl LibraryItem {
+    #[must_use]
+    pub fn source_file(&self) -> Option<PathBuf> {
+        self.kind.source_file().map(|name| self.path.join(name))
+    }
+
+    #[must_use]
+    pub fn display_name(&self) -> String {
+        self.vendor_origin.as_ref().map_or_else(
+            || self.name.clone(),
+            |origin| format!("vendor/{origin}/{}", self.name),
+        )
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct LibraryDiagnostic {
+    pub message: String,
+}
+
+#[derive(Debug, Default)]
+pub struct Library {
+    pub items: Vec<LibraryItem>,
+    pub tombstones: Vec<String>,
+    pub diagnostics: Vec<LibraryDiagnostic>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct ItemKey {
+    kind: Kind,
+    vendor_origin: Option<String>,
+    name: String,
+}
+
+#[derive(Debug)]
+enum Candidate {
+    Item(LibraryItem),
+    Tombstone(PathBuf),
+}
+
+impl Library {
+    pub fn scan(config: &Config) -> Result<Self> {
+        let mut public = scan_root(&config.public_library, ItemSource::Public)?;
+        let local = if config.local_library == config.public_library {
+            BTreeMap::new()
+        } else {
+            scan_root(&config.local_library, ItemSource::Local)?
+        };
+        let mut result = Self::default();
+
+        for (key, candidate) in local {
+            let public_item = public.remove(&key);
+            match candidate {
+                Candidate::Tombstone(path) => {
+                    let label = key_label(&key);
+                    result.tombstones.push(label.clone());
+                    if public_item.is_none() {
+                        result.diagnostics.push(LibraryDiagnostic {
+                            message: format!("orphan tombstone {label} at {}", path.display()),
+                        });
+                    }
+                }
+                Candidate::Item(item) => {
+                    if public_item.is_none() {
+                        result.diagnostics.push(LibraryDiagnostic {
+                            message: format!("local orphan override {}", key_label(&key)),
+                        });
+                    } else if key.vendor_origin.is_some() {
+                        result.diagnostics.push(LibraryDiagnostic {
+                            message: format!("local vendor shadow {}", key_label(&key)),
+                        });
+                    }
+                    result.items.push(item);
+                }
+            }
+        }
+
+        for candidate in public.into_values() {
+            if let Candidate::Item(item) = candidate {
+                result.items.push(item);
+            }
+        }
+        result.items.sort_by(|left, right| {
+            (left.kind, &left.vendor_origin, &left.name).cmp(&(
+                right.kind,
+                &right.vendor_origin,
+                &right.name,
+            ))
+        });
+        result.tombstones.sort();
+        Ok(result)
+    }
+}
+
+fn scan_root(root: &Path, source: ItemSource) -> Result<BTreeMap<ItemKey, Candidate>> {
+    let mut found = BTreeMap::new();
+    for kind in Kind::ALL {
+        let kind_root = root.join(kind.dir_name());
+        if !kind_root.is_dir() {
+            continue;
+        }
+        for entry in sorted_entries(&kind_root)? {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let path = entry.path();
+            if kind == Kind::Skills && name == "vendor" && path.is_dir() {
+                scan_vendor(&path, source, &mut found)?;
+                continue;
+            }
+            if !path.is_dir() {
+                continue;
+            }
+            insert_candidate(&mut found, kind, name, None, path, source)?;
+        }
+    }
+    Ok(found)
+}
+
+fn scan_vendor(
+    vendor_root: &Path,
+    source: ItemSource,
+    found: &mut BTreeMap<ItemKey, Candidate>,
+) -> Result<()> {
+    for origin_entry in sorted_entries(vendor_root)? {
+        let origin_path = origin_entry.path();
+        if !origin_path.is_dir() {
+            continue;
+        }
+        let origin = origin_entry.file_name().to_string_lossy().into_owned();
+        for item_entry in sorted_entries(&origin_path)? {
+            let item_path = item_entry.path();
+            if !item_path.is_dir() {
+                continue;
+            }
+            insert_candidate(
+                found,
+                Kind::Skills,
+                item_entry.file_name().to_string_lossy().into_owned(),
+                Some(origin.clone()),
+                item_path,
+                source,
+            )?;
+        }
+    }
+    Ok(())
+}
+
+fn insert_candidate(
+    found: &mut BTreeMap<ItemKey, Candidate>,
+    kind: Kind,
+    name: String,
+    vendor_origin: Option<String>,
+    path: PathBuf,
+    source: ItemSource,
+) -> Result<()> {
+    let key = ItemKey {
+        kind,
+        vendor_origin: vendor_origin.clone(),
+        name: name.clone(),
+    };
+    if path.join(".agent-sync-tombstone").is_file() {
+        found.insert(key, Candidate::Tombstone(path));
+        return Ok(());
+    }
+    let valid = kind.source_file().map_or_else(
+        || path.join("manifest.toml").is_file(),
+        |file| path.join(file).is_file(),
+    );
+    if !valid {
+        return Ok(());
+    }
+    let manifest = Manifest::load(&path)?;
+    found.insert(
+        key,
+        Candidate::Item(LibraryItem {
+            kind,
+            name,
+            vendor_origin,
+            path,
+            source,
+            manifest,
+        }),
+    );
+    Ok(())
+}
+
+fn sorted_entries(path: &Path) -> Result<Vec<fs::DirEntry>> {
+    let mut entries = fs::read_dir(path)
+        .with_context(|| format!("read Library directory {}", path.display()))?
+        .collect::<std::io::Result<Vec<_>>>()
+        .with_context(|| format!("read entries under {}", path.display()))?;
+    entries.sort_by_key(fs::DirEntry::file_name);
+    Ok(entries)
+}
+
+fn key_label(key: &ItemKey) -> String {
+    key.vendor_origin.as_ref().map_or_else(
+        || format!("{}/{}", key.kind, key.name),
+        |origin| format!("{}/vendor/{origin}/{}", key.kind, key.name),
+    )
+}

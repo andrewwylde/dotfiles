@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Wrapper: prefer a built/release agent-sync binary, else cargo run from the crate.
+set -euo pipefail
+
+dotfiles_dir() {
+  if [[ -n "${DOTFILES_DIR:-}" && -d "${DOTFILES_DIR}" ]]; then
+    printf '%s\n' "${DOTFILES_DIR}"
+    return 0
+  fi
+  local d
+  for d in "${HOME}/dotfiles" "${HOME}/dotfiles-local"; do
+    if [[ -d "${d}/agent-sync" ]]; then
+      printf '%s\n' "${d}"
+      return 0
+    fi
+  done
+  local here
+  here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  if [[ -d "${here}/agent-sync" ]]; then
+    printf '%s\n' "${here}"
+    return 0
+  fi
+  echo "agent-sync: could not find dotfiles/agent-sync (set DOTFILES_DIR)" >&2
+  return 1
+}
+
+ROOT="$(dotfiles_dir)"
+CANDIDATES=(
+  "${HOME}/.local/bin/agent-sync"
+  "${ROOT}/agent-sync/target/release/agent-sync"
+  "${ROOT}/agent-sync/target/debug/agent-sync"
+)
+
+for bin in "${CANDIDATES[@]}"; do
+  if [[ -x "${bin}" ]]; then
+    exec "${bin}" "$@"
+  fi
+done
+
+if command -v cargo >/dev/null 2>&1; then
+  exec cargo run --quiet --manifest-path "${ROOT}/agent-sync/Cargo.toml" --release -- "$@"
+fi
+
+echo "agent-sync: binary not found; run setup or: (cd agent-sync && cargo build --release)" >&2
+exit 1
