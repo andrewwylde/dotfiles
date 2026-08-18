@@ -60,7 +60,14 @@ impl Config {
     #[must_use]
     pub fn fanout_name(&self, name: &str, vendor_origin: Option<&str>) -> String {
         vendor_origin.map_or_else(
-            || format!("{}-{name}", self.owner_prefix),
+            || {
+                let prefix = format!("{}-", self.owner_prefix);
+                if name.starts_with(&prefix) {
+                    name.to_owned()
+                } else {
+                    format!("{prefix}{name}")
+                }
+            },
             |origin| format!("vendor-{origin}-{name}"),
         )
     }

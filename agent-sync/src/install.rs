@@ -1,3 +1,4 @@
+use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -61,6 +62,7 @@ pub fn install(
     let parent = destination
         .parent()
         .context("install destination has no parent")?;
+    refuse_dotfiles_target(destination)?;
     fs::create_dir_all(parent)
         .with_context(|| format!("create install parent {}", parent.display()))?;
     match mode {
@@ -68,6 +70,38 @@ pub fn install(
         InstallMode::Symlink => create_symlink(source, destination)?,
     }
     Ok(InstallOutcome::Installed(mode))
+}
+
+fn refuse_dotfiles_target(destination: &Path) -> Result<()> {
+    let Ok(dotfiles) = env::var("DOTFILES_DIR")
+        .map(PathBuf::from)
+        .or_else(|_| {
+            env::var("HOME").map(|home| PathBuf::from(home).join("dotfiles"))
+        })
+    else {
+        return Ok(());
+    };
+    let Ok(resolved) = destination.canonicalize().or_else(|_| {
+        destination
+            .parent()
+            .map_or_else(|| Err(std::io::Error::other("missing parent")), |parent| {
+                parent.canonicalize().map(|base| base.join(destination.file_name().unwrap_or_default()))
+            })
+    }) else {
+        return Ok(());
+    };
+    if resolved.starts_with(&dotfiles)
+        && !resolved.starts_with(dotfiles.join("library"))
+        && !resolved.starts_with(dotfiles.join(".agent-sync-backups"))
+    {
+        bail!(
+            "refusing to install into the dotfiles clone at {}\n\
+             Legacy layout often symlinks ~/.claude/skills (etc.) into the repo.\n\
+             Replace those symlinks with real directories under $HOME, then re-run sync.",
+            resolved.display()
+        );
+    }
+    Ok(())
 }
 
 pub fn remove_path(path: &Path) -> Result<()> {

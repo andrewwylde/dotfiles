@@ -27,7 +27,15 @@ pub fn parse(text: &str) -> Result<Markdown> {
     let frontmatter = if yaml.trim().is_empty() {
         Value::Mapping(Mapping::new())
     } else {
-        serde_yaml::from_str(yaml).context("parse YAML frontmatter")?
+        match serde_yaml::from_str(yaml) {
+            Ok(value) => value,
+            Err(first) => {
+                let repaired = quote_unquoted_description(yaml);
+                serde_yaml::from_str(&repaired).context(format!(
+                    "parse YAML frontmatter (also failed after quoting description): {first}"
+                ))?
+            }
+        }
     };
     if !frontmatter.is_mapping() {
         bail!("frontmatter must be a YAML mapping");
@@ -37,6 +45,29 @@ pub fn parse(text: &str) -> Result<Markdown> {
         body: after_separator.strip_prefix('\n').unwrap_or("").to_owned(),
         had_frontmatter: true,
     })
+}
+
+fn quote_unquoted_description(yaml: &str) -> String {
+    let mut out = Vec::new();
+    for line in yaml.lines() {
+        let Some(rest) = line.strip_prefix("description:") else {
+            out.push(line.to_owned());
+            continue;
+        };
+        let value = rest.trim_start();
+        if value.is_empty()
+            || value.starts_with('"')
+            || value.starts_with('\'')
+            || value.starts_with('|')
+            || value.starts_with('>')
+        {
+            out.push(line.to_owned());
+            continue;
+        }
+        let escaped = value.replace('\\', "\\\\").replace('"', "\\\"");
+        out.push(format!("description: \"{escaped}\""));
+    }
+    out.join("\n")
 }
 
 pub fn render(markdown: &Markdown) -> Result<String> {
