@@ -17,9 +17,13 @@ pub fn run(config: &Config) -> Result<()> {
             .as_ref()
             .map(|origin| format!("vendor/{origin}/"))
             .unwrap_or_default();
-        let source = match item.source {
-            ItemSource::Public => "public",
-            ItemSource::Local => "local",
+        let source = if item.shadows_public {
+            "local-shadow"
+        } else {
+            match item.source {
+                ItemSource::Public => "public",
+                ItemSource::Local => "local",
+            }
         };
         let fanout = config.fanout_name(&item.name, item.vendor_origin.as_deref());
         println!(

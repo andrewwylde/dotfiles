@@ -227,10 +227,8 @@ fn rewrite_value(
                     };
                     let explicit_relative = format!("./{file_name}");
                     if command.contains(&explicit_relative) {
-                        *command = command.replace(
-                            &explicit_relative,
-                            &destination.to_string_lossy(),
-                        );
+                        *command =
+                            command.replace(&explicit_relative, &destination.to_string_lossy());
                     } else if command == file_name {
                         *command = destination.to_string_lossy().into_owned();
                     }

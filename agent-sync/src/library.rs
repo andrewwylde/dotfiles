@@ -68,6 +68,7 @@ pub struct LibraryItem {
     pub vendor_origin: Option<String>,
     pub path: PathBuf,
     pub source: ItemSource,
+    pub shadows_public: bool,
     pub manifest: Manifest,
 }
 
@@ -133,8 +134,9 @@ impl Library {
                         });
                     }
                 }
-                Candidate::Item(item) => {
-                    if public_item.is_none() {
+                Candidate::Item(mut item) => {
+                    item.shadows_public = public_item.is_some();
+                    if !item.shadows_public {
                         result.diagnostics.push(LibraryDiagnostic {
                             message: format!("local orphan override {}", key_label(&key)),
                         });
@@ -250,6 +252,7 @@ fn insert_candidate(
             vendor_origin,
             path,
             source,
+            shadows_public: false,
             manifest,
         }),
     );

@@ -4,62 +4,55 @@
 OpenCode, and Pi. Cursor receives copies; other Targets receive symlinks unless
 their destination parent is itself a symlink.
 
-```sh
-cargo build --release
-./target/release/agent-sync sync
-./target/release/agent-sync sync --dry-run
-./target/release/agent-sync verify
-./target/release/agent-sync list
-```
-
-Set `DOTFILES_DIR` when the repo is not at `~/dotfiles` or
-`~/dotfiles-local`. Use `sync --root <sandbox>` to redirect Target paths during
-testing.
-
-Migration is explicit and backed up under `.agent-sync-backups/`:
-
-```sh
-agent-sync migrate --dry-run
-agent-sync migrate --write
-agent-sync migrate --write --backup-targets
-agent-sync migrate --rollback <backup-id>
-```
-
-`--write` refuses dirty legacy Target trees unless `--allow-dirty` is supplied.
-Unsupported Target/kind combinations are reported and skipped. Do not run
-`npx skills remove --all -y` unattended: it scans Target directories and can
-delete `andrew-*` fan-outs; recover them with `agent-sync sync`.
-# agent-sync
-
-Fan out an agent-neutral Library (`library/{skills,commands,agents,hooks}`) to Claude Code, Cursor, OpenCode, and Pi.
-
 ## Build
 
-```bash
+```sh
 cd agent-sync
 cargo build --release
-cp target/release/agent-sync ~/dotfiles/bin/agent-sync   # or use setup helpers
+# setup/common.sh also installs to ~/.local/bin
 ```
 
 ## Usage
 
-```bash
-export DOTFILES_DIR=~/dotfiles   # optional
+```sh
+export DOTFILES_DIR=~/dotfiles   # optional; defaults to ~/dotfiles or ~/dotfiles-local
 agent-sync list
 agent-sync sync --dry-run
 agent-sync sync
 agent-sync verify
 agent-sync migrate --dry-run
 agent-sync migrate --write
-agent-sync migrate --rollback 20260818T000000Z
+agent-sync migrate --rollback <backup-id>
 ```
 
 Sandbox / tests:
 
-```bash
+```sh
 agent-sync sync --root /tmp/agent-sync-sandbox
+cargo test
 ```
+
+Migration is backed up under `.agent-sync-backups/`. `--write` refuses dirty
+legacy Target trees unless `--allow-dirty` is supplied. Unsupported
+Target/kind combinations are reported and skipped.
+
+Do not run `npx skills remove --all -y` unattended: it scans Target
+directories and can delete `andrew-*` fan-outs; recover them with
+`agent-sync sync`.
 
 ## Library layout
 
 See repo `CONTEXT.md` and `.taskmaster/docs/locked-manifest-schema.md`.
+
+## Release workflow
+
+GitHub Actions workflow source lives at `ci/agent-sync-release.yml`. Copy it
+to `.github/workflows/agent-sync-release.yml` when the pushing token has the
+`workflow` scope (OAuth apps without that scope cannot create workflow files):
+
+```sh
+mkdir -p .github/workflows
+cp agent-sync/ci/agent-sync-release.yml .github/workflows/agent-sync-release.yml
+```
+
+Tag releases as `agent-sync-v*`.

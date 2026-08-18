@@ -433,7 +433,7 @@ fn print_plan(config: &Config, actions: &[MigrationAction]) {
             .as_ref()
             .map_or_else(|| "-".to_owned(), |path| path.display().to_string());
         println!(
-            "{}\t{}\t{}\t{}\t{}\t{}",
+            "{}\t{}\t{}\t{}\t{}\t{} [{}]",
             action.disposition.label(),
             action.kind,
             source.display(),
@@ -444,7 +444,8 @@ fn print_plan(config: &Config, actions: &[MigrationAction]) {
                 Disposition::Private => "leave-private",
                 Disposition::Abandon => "remove-legacy",
             },
-            format!("{} [{}]", action.note, action.name)
+            action.note,
+            action.name
         );
     }
 }
@@ -664,7 +665,7 @@ fn first_markdown(root: &Path) -> Result<Option<PathBuf>> {
     files.sort_by_key(|entry| entry.path().to_path_buf());
     Ok(files
         .into_iter()
-        .map(|entry| entry.into_path())
+        .map(walkdir::DirEntry::into_path)
         .find(|path| {
             path.is_file()
                 && path.extension().and_then(|extension| extension.to_str()) == Some("md")
@@ -791,10 +792,7 @@ fn copy_preserving_symlink(source: &Path, destination: &Path) -> Result<()> {
         let mut entries = fs::read_dir(source)?.collect::<std::io::Result<Vec<_>>>()?;
         entries.sort_by_key(fs::DirEntry::file_name);
         for entry in entries {
-            copy_preserving_symlink(
-                &entry.path(),
-                &destination.join(entry.file_name()),
-            )?;
+            copy_preserving_symlink(&entry.path(), &destination.join(entry.file_name()))?;
         }
         Ok(())
     } else {

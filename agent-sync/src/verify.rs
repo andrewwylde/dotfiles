@@ -1,4 +1,7 @@
-use anyhow::Result;
+use std::collections::BTreeSet;
+use std::fs;
+
+use anyhow::{Context, Result};
 
 use crate::config::Config;
 use crate::hooks;
@@ -8,58 +11,112 @@ use crate::state::State;
 use crate::sync;
 use crate::target::Target;
 
-/// Returns `Ok(true)` when verification passes.
 pub fn run(config: &Config) -> Result<bool> {
     let library = Library::scan(config)?;
+    let state = State::load(&config.state_file)?;
+    let mut valid = true;
+    let mut expected_paths = BTreeSet::new();
+
     for diagnostic in &library.diagnostics {
         eprintln!("WARN {}", diagnostic.message);
     }
-
-    let mut ok = true;
-    let expected = sync::expected_markdown(config, &library)?;
-    let state = State::load(&config.state_file)?;
-
-    for item in &expected {
-        if item.excluded {
+    for expected in sync::expected_markdown(config, &library)? {
+        if expected.excluded {
+            println!(
+                "SKIP {}/{} -> {} (Manifest exclude)",
+                expected.kind, expected.item_name, expected.target
+            );
             continue;
         }
-        if !install::path_exists(&item.destination) {
+        expected_paths.insert(expected.destination.clone());
+        if !install::path_exists(&expected.destination) {
             eprintln!(
-                "ERROR missing {}/{} at {}",
-                item.kind,
-                item.item_name,
-                item.destination.display()
+                "ERROR missing {}/{} -> {} at {}",
+                expected.kind,
+                expected.item_name,
+                expected.target,
+                expected.destination.display()
             );
-            ok = false;
+            valid = false;
             continue;
         }
-        if item.target == Target::Cursor
-            && std::fs::symlink_metadata(&item.destination)
-                .ok()
-                .is_some_and(|meta| meta.file_type().is_symlink())
-        {
+        if install::is_npx_owned_symlink(&expected.destination)? {
             eprintln!(
-                "ERROR cursor install must be a copy, found symlink {}",
-                item.destination.display()
+                "ERROR {}/{} -> {} is npx-owned at {}",
+                expected.kind,
+                expected.item_name,
+                expected.target,
+                expected.destination.display()
             );
-            ok = false;
+            valid = false;
+            continue;
         }
-        let actual = std::fs::read_to_string(&item.main_destination).unwrap_or_default();
-        if actual != item.content {
+        if !state.owns(&expected.destination) {
             eprintln!(
-                "ERROR content drift {}/{} -> {}",
-                item.kind,
-                item.item_name,
-                item.main_destination.display()
-            );
-            ok = false;
-        }
-        if !state.owns(&item.destination) {
-            eprintln!(
-                "WARN {} not recorded in state {}",
-                item.destination.display(),
+                "ERROR {} is not recorded in {}",
+                expected.destination.display(),
                 config.state_file.display()
             );
+            valid = false;
+        }
+
+        let installed = fs::read_to_string(&expected.main_destination).with_context(|| {
+            format!(
+                "read installed markdown {}",
+                expected.main_destination.display()
+            )
+        })?;
+        if installed != expected.content {
+            eprintln!(
+                "ERROR content mismatch {}/{} -> {} at {}",
+                expected.kind,
+                expected.item_name,
+                expected.target,
+                expected.main_destination.display()
+            );
+            valid = false;
+        }
+
+        let metadata = fs::symlink_metadata(&expected.destination)
+            .with_context(|| format!("inspect {}", expected.destination.display()))?;
+        let parent_is_symlink = expected
+            .destination
+            .parent()
+            .and_then(|parent| fs::symlink_metadata(parent).ok())
+            .is_some_and(|parent| parent.file_type().is_symlink());
+        let should_copy = expected.target == Target::Cursor || parent_is_symlink;
+        if should_copy == metadata.file_type().is_symlink() {
+            eprintln!(
+                "ERROR wrong install mode for {}/{} -> {} at {}",
+                expected.kind,
+                expected.item_name,
+                expected.target,
+                expected.destination.display()
+            );
+            valid = false;
+        } else {
+            println!(
+                "OK {}/{} -> {} ({})",
+                expected.kind,
+                expected.item_name,
+                expected.target,
+                if should_copy { "copy" } else { "symlink" }
+            );
+        }
+    }
+
+    for item in &library.items {
+        for target in Target::ALL {
+            if !target.supports(item.kind) {
+                println!(
+                    "INFO {}/{} -> {target} skipped: {}",
+                    item.kind,
+                    item.display_name(),
+                    target
+                        .unsupported_reason(item.kind)
+                        .unwrap_or("unsupported")
+                );
+            }
         }
     }
 
@@ -69,11 +126,26 @@ pub fn run(config: &Config) -> Result<bool> {
         .filter(|item| item.kind == Kind::Hooks)
         .collect::<Vec<_>>();
     if !hooks::verify(config, &packs)? {
-        ok = false;
+        valid = false;
     }
 
-    if ok {
+    if !library.items.is_empty() && !config.state_file.exists() {
+        eprintln!("ERROR missing state file {}", config.state_file.display());
+        valid = false;
+    }
+    for entry in &state.fanouts {
+        if !install::path_exists(&entry.agent_path) {
+            eprintln!("ERROR state path missing {}", entry.agent_path.display());
+            valid = false;
+        }
+        if entry.kind != "hooks" && !expected_paths.contains(&entry.agent_path) {
+            eprintln!("ERROR stale state path {}", entry.agent_path.display());
+            valid = false;
+        }
+    }
+
+    if valid {
         println!("OK verify passed");
     }
-    Ok(ok)
+    Ok(valid)
 }

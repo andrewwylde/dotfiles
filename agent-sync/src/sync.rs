@@ -103,20 +103,7 @@ pub fn run(config: &Config, dry_run: bool) -> Result<()> {
         }
     }
 
-    for item in &library.items {
-        for target in Target::ALL {
-            if !target.supports(item.kind) {
-                println!(
-                    "INFO {}/{} -> {target} skipped: {}",
-                    item.kind,
-                    item.display_name(),
-                    target
-                        .unsupported_reason(item.kind)
-                        .unwrap_or("unsupported")
-                );
-            }
-        }
-    }
+    print_unsupported(&library);
 
     let hook_packs = library
         .items
@@ -140,6 +127,23 @@ pub fn run(config: &Config, dry_run: bool) -> Result<()> {
         println!("STATE {}", config.state_file.display());
     }
     Ok(())
+}
+
+fn print_unsupported(library: &Library) {
+    for item in &library.items {
+        for target in Target::ALL {
+            if !target.supports(item.kind) {
+                println!(
+                    "INFO {}/{} -> {target} skipped: {}",
+                    item.kind,
+                    item.display_name(),
+                    target
+                        .unsupported_reason(item.kind)
+                        .unwrap_or("unsupported")
+                );
+            }
+        }
+    }
 }
 
 pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<ExpectedMarkdown>> {
