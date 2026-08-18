@@ -1,158 +1,53 @@
 #!/usr/bin/env bash
-# Sync Claude Code and Cursor agents/skills/commands from dotfiles via symlinks.
-#
-# Canonical copies live under $DOTFILES_DIR/.claude and $DOTFILES_DIR/.cursor.
-# Run after `rcup` (hooks/post-up) or manually when setting up a new machine.
+# Legacy entrypoint — prefer agent-sync; fall back to symlink installer during migration.
 set -euo pipefail
 
-usage() {
-  cat <<'EOF'
-Usage: sync-ai-assistants [--dry-run] [--verify]
-
-  Migrates existing ~/.claude and ~/.cursor agent/skill/command trees into
-  dotfiles (if needed), then symlinks them back.
-
-  --dry-run   Show actions without changing files.
-  --verify    Exit 1 if any managed path is missing or not a dotfiles symlink.
-EOF
-}
-
-dotfiles_dir() {
-  if [[ -n "${DOTFILES_DIR:-}" && -d "${DOTFILES_DIR}" ]]; then
-    printf '%s\n' "${DOTFILES_DIR}"
-    return 0
-  fi
-  local d
-  for d in "${HOME}/dotfiles" "${HOME}/dotfiles-local"; do
-    if [[ -d "${d}" ]]; then
-      printf '%s\n' "${d}"
-      return 0
-    fi
-  done
-  echo "sync-ai-assistants: no dotfiles directory found (set DOTFILES_DIR)" >&2
-  return 1
-}
-
-# rel paths under $HOME (parents ~/.claude / ~/.cursor stay real directories)
-MANAGED_PATHS=(
-  .claude/agents
-  .claude/skills
-  .claude/commands
-  .cursor/agents
-  .cursor/skills
-  .cursor/skills-cursor
-  .cursor/commands
-)
-
-dry_run=0
-verify_only=0
-for arg in "$@"; do
-  case "$arg" in
-    -h | --help) usage; exit 0 ;;
-    -n | --dry-run) dry_run=1 ;;
-    --verify) verify_only=1 ;;
-    *) echo "sync-ai-assistants: unknown argument: $arg" >&2; usage >&2; exit 2 ;;
-  esac
-done
-
-DOTFILES="$(dotfiles_dir)"
-export DOTFILES
-
-run() {
-  if [[ "$dry_run" -eq 1 ]]; then
-    printf 'would run: %q\n' "$*"
-  else
-    "$@"
-  fi
-}
-
-canonical_path() {
-  python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
-}
-
-expected_target() {
-  local rel=$1
-  canonical_path "${DOTFILES}/${rel}"
-}
-
-sync_one() {
-  local rel=$1
-  local src="${DOTFILES}/${rel}"
-  local dest="${HOME}/${rel}"
-  local want
-  want="$(expected_target "${rel}")"
-
-  run mkdir -p "$(dirname "$src")" "$(dirname "$dest")"
-  run mkdir -p "$src"
-
-  if [[ -e "$dest" || -L "$dest" ]]; then
-    if [[ -L "$dest" ]]; then
-      local have
-      have="$(canonical_path "$dest")"
-      if [[ "$have" == "$want" ]]; then
-        return 0
-      fi
-      if [[ "$dry_run" -eq 1 ]]; then
-        printf 'would replace symlink %s -> %s (was %s)\n' "$dest" "$src" "$have"
-      else
-        run rm "$dest"
-      fi
-    elif [[ -d "$dest" ]]; then
-      if [[ "$dry_run" -eq 1 ]]; then
-        printf 'would migrate %s/ -> %s/\n' "$dest" "$src"
-        printf 'would rm -rf %s\n' "$dest"
-      else
-        # Merge local customizations into dotfiles (dotfiles wins on conflicts).
-        run rsync -a --ignore-existing "$dest/" "$src/"
-        run rsync -a "$dest/" "$src/"
-        run rm -rf "$dest"
-      fi
-    else
-      echo "sync-ai-assistants: refusing to replace non-directory: $dest" >&2
-      return 1
-    fi
-  fi
-
-  if [[ "$dry_run" -eq 1 ]]; then
-    printf 'would ln -sfn %s %s\n' "$src" "$dest"
-  else
-    run ln -sfn "$src" "$dest"
-  fi
-}
-
-verify_one() {
-  local rel=$1
-  local dest="${HOME}/${rel}"
-  local want
-  want="$(expected_target "${rel}")"
-
-  if [[ ! -L "$dest" ]]; then
-    echo "not a symlink: $dest" >&2
-    return 1
-  fi
-  local have
-  have="$(canonical_path "$dest")"
-  if [[ "$have" != "$want" ]]; then
-    echo "wrong target: $dest -> $have (want $want)" >&2
-    return 1
-  fi
-  if [[ ! -d "$want" ]]; then
-    echo "missing canonical dir: $want" >&2
-    return 1
-  fi
-  return 0
-}
-
-fail=0
-if [[ "$verify_only" -eq 1 ]]; then
-  for rel in "${MANAGED_PATHS[@]}"; do
-    verify_one "$rel" || fail=1
-  done
-  exit "$fail"
+DOTFILES="${DOTFILES_DIR:-${HOME}/dotfiles}"
+if [[ ! -d "${DOTFILES}" && -d "${HOME}/dotfiles-local" ]]; then
+  DOTFILES="${HOME}/dotfiles-local"
 fi
 
-for rel in "${MANAGED_PATHS[@]}"; do
-  sync_one "$rel"
-done
+run_agent_sync() {
+  local bin=""
+  if [[ -x "${HOME}/.local/bin/agent-sync" ]]; then
+    bin="${HOME}/.local/bin/agent-sync"
+  elif [[ -x "${DOTFILES}/bin/agent-sync" && -f "${DOTFILES}/bin/agent-sync" ]]; then
+    # Prefer real binary or wrapper that can resolve a build.
+    if head -1 "${DOTFILES}/bin/agent-sync" | grep -q '^#!'; then
+      bin="${DOTFILES}/bin/agent-sync"
+    elif [[ -x "${DOTFILES}/agent-sync/target/release/agent-sync" ]]; then
+      bin="${DOTFILES}/agent-sync/target/release/agent-sync"
+    fi
+  elif [[ -x "${DOTFILES}/agent-sync/target/release/agent-sync" ]]; then
+    bin="${DOTFILES}/agent-sync/target/release/agent-sync"
+  fi
+  [[ -n "${bin}" ]] || return 127
 
-echo "AI assistant paths synced (dotfiles: ${DOTFILES})"
+  case "${1:-}" in
+    --verify)
+      DOTFILES_DIR="${DOTFILES}" "${bin}" verify
+      ;;
+    --dry-run)
+      DOTFILES_DIR="${DOTFILES}" "${bin}" sync --dry-run
+      ;;
+    "" )
+      DOTFILES_DIR="${DOTFILES}" "${bin}" sync
+      ;;
+    *)
+      DOTFILES_DIR="${DOTFILES}" "${bin}" "$@"
+      ;;
+  esac
+}
+
+if run_agent_sync "$@"; then
+  exit 0
+fi
+
+echo "sync-ai-assistants: agent-sync not available; using legacy symlink sync" >&2
+LEGACY="$(cd "$(dirname "$0")" && pwd)/sync-ai-assistants.legacy"
+if [[ -x "${LEGACY}" ]]; then
+  exec env DOTFILES_DIR="${DOTFILES}" "${LEGACY}" "$@"
+fi
+
+echo "sync-ai-assistants: missing agent-sync and sync-ai-assistants.legacy" >&2
+exit 1

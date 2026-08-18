@@ -1142,6 +1142,21 @@ main() {
     
     # Database Tools
     configure_postgres
+
+    # Dotfiles harness: agent-sync + rcup (parity with wsl-setup)
+    local repo_root
+    repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [[ -f "${repo_root}/setup/common.sh" ]]; then
+      # shellcheck source=setup/common.sh
+      source "${repo_root}/setup/common.sh"
+      install_agent_sync "${repo_root}"
+      if command_exists rcup; then
+        run_rcup "${repo_root}" || log_warn "rcup failed or rcm missing"
+      else
+        log_warn "rcm/rcup not installed; skip rcup (brew install rcm)"
+      fi
+      run_agent_sync "${repo_root}" 1
+    fi
     
     # Final instructions
     log_info "Setup complete!"

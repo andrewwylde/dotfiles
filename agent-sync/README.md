@@ -1,0 +1,58 @@
+# agent-sync
+
+`agent-sync` fans out the agent-neutral `library/` into Claude Code, Cursor,
+OpenCode, and Pi. Cursor receives copies; other Targets receive symlinks unless
+their destination parent is itself a symlink.
+
+## Build
+
+```sh
+cd agent-sync
+cargo build --release
+# setup/common.sh also installs to ~/.local/bin
+```
+
+## Usage
+
+```sh
+export DOTFILES_DIR=~/dotfiles   # optional; defaults to ~/dotfiles or ~/dotfiles-local
+agent-sync list
+agent-sync sync --dry-run
+agent-sync sync
+agent-sync verify
+agent-sync migrate --dry-run
+agent-sync migrate --write
+agent-sync migrate --rollback <backup-id>
+```
+
+Sandbox / tests:
+
+```sh
+agent-sync sync --root /tmp/agent-sync-sandbox
+cargo test
+```
+
+Migration is backed up under `.agent-sync-backups/`. `--write` refuses dirty
+legacy Target trees unless `--allow-dirty` is supplied. Unsupported
+Target/kind combinations are reported and skipped.
+
+Do not run `npx skills remove --all -y` unattended: it scans Target
+directories and can delete `andrew-*` fan-outs; recover them with
+`agent-sync sync`.
+
+## Library layout
+
+See repo `CONTEXT.md` and `.taskmaster/docs/locked-manifest-schema.md`.
+
+## Release workflow
+
+GitHub Actions workflow source lives at `ci/agent-sync-release.yml`. Copy it
+to `.github/workflows/agent-sync-release.yml` when the pushing token has the
+`workflow` scope (OAuth apps without that scope cannot create workflow files):
+
+```sh
+mkdir -p .github/workflows
+cp agent-sync/ci/agent-sync-release.yml .github/workflows/agent-sync-release.yml
+```
+
+Tag releases as `agent-sync-v*`.
