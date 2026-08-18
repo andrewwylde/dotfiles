@@ -1,0 +1,13 @@
+version = "1.0.0"
+exclude = ["claude", "opencode", "pi"]
+
+[hooks.cursor]
+beforeShellExecution = [
+  { command = "./block-worktree-remove.sh", matcher = "worktree\\s+(remove|rm)\\b|(?:^|[\\s;|&])(?:/bin/)?rm(?:\\s|$)", failClosed = true, timeout = 10 },
+  { command = "./block-root-writes.sh", failClosed = true, timeout = 10 },
+  { command = "./block-pr-diff-artifacts.sh", failClosed = true, timeout = 10 },
+]
+preToolUse = [
+  { command = "./enforce-gate.sh", matcher = "StrReplace|Write|EditNotebook|ApplyPatch", failClosed = true, timeout = 10 },
+  { command = "./guard-markdown-artifacts.sh", matcher = "StrReplace|Write|EditNotebook|ApplyPatch", failClosed = true, timeout = 10 },
+]

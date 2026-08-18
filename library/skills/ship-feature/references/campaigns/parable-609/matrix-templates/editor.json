@@ -1,0 +1,18 @@
+{
+  "ticket": "PARABLE-641",
+  "region": "editor",
+  "rows": [
+    {
+      "id": "desktop-default",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder",
+      "region": "editor",
+      "assertions": [
+        { "kind": "testid", "selector": "ponder-region-editor", "expected": "visible" },
+        { "kind": "testid", "selector": "ponder-dev-harness", "expected": "visible" }
+      ],
+      "screenshots": ["editor-desktop-default.png"]
+    }
+  ]
+}

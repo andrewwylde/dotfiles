@@ -39,7 +39,13 @@ A working `agent-sync` Rust CLI in this repo that owns an agent-neutral `library
 
 - Release signing / attestation (optional)
 - Tombstone on-disk marker exact path (behavior locked)
-- Full `agent-sync` Rust implementation (route is clear — hand off to build; not a wayfinder decision)
+
+## Follow-ons (post build)
+
+- Copy `agent-sync/ci/agent-sync-release.yml` → `.github/workflows/` when the push token has `workflow` scope; tag `agent-sync-v*`
+- Merge `sync/harness-and-tools` → `main`
+- Delete `bin/sync-ai-assistants` shim after cutover
+- Detach any remaining `~/.claude` / `~/.cursor` trees that still symlink into the clone (product `skills-cursor/` may stay)
 
 ## Out of scope
 

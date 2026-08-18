@@ -40,6 +40,14 @@ Do not run `npx skills remove --all -y` unattended: it scans Target
 directories and can delete `andrew-*` fan-outs; recover them with
 `agent-sync sync`.
 
+## Legacy home → repo symlinks
+
+Older `sync-ai-assistants` layouts often symlink `~/.claude/skills` (and
+Cursor/commands/agents counterparts) into this clone. Fan-out must land in
+real `$HOME` directories, not the git tree. If those links still exist, replace
+them with real directories, then `agent-sync sync` again. `agent-sync` refuses
+to install into the clone outside `library/`.
+
 ## Library layout
 
 See repo `CONTEXT.md` and `.taskmaster/docs/locked-manifest-schema.md`.

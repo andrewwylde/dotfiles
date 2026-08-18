@@ -1,0 +1,126 @@
+{
+  "ticket": "PARABLE-1045",
+  "harness_kind": "app_route",
+  "path": "/admin/ponder",
+  "spec_path": "apps/web-app/e2e/admin-ponder/run-results.spec.ts",
+  "rows": [
+    {
+      "id": "loading",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-loading",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane", "expected": "visible" },
+        { "kind": "testid", "selector": "plot-run-loading", "expected": "visible" }
+      ],
+      "screenshots": ["run-loading.png"]
+    },
+    {
+      "id": "rows",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-rows",
+      "live": true,
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-results-table", "expected": "visible" },
+        { "kind": "testid", "selector": "plot-run-row-count", "expected": "visible" },
+        { "kind": "testid", "selector": "plot-run-elapsed", "expected": "visible" }
+      ],
+      "screenshots": ["run-rows.png"]
+    },
+    {
+      "id": "zero",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-zero",
+      "live": true,
+      "assertions": [
+        { "kind": "testid", "selector": "plot-run-zero-rows", "expected": "visible" }
+      ],
+      "screenshots": ["run-zero.png"]
+    },
+    {
+      "id": "error-syntax",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-error-syntax",
+      "live": true,
+      "assertions": [
+        { "kind": "testid", "selector": "plot-run-error", "expected": "visible" }
+      ],
+      "screenshots": ["run-error-syntax.png"]
+    },
+    {
+      "id": "error-unknown-table",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-error-unknown-table",
+      "live": true,
+      "assertions": [
+        { "kind": "testid", "selector": "plot-run-error", "expected": "visible" }
+      ],
+      "screenshots": ["run-error-unknown-table.png"]
+    },
+    {
+      "id": "error-permission",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-error-permission",
+      "live": true,
+      "assertions": [
+        { "kind": "testid", "selector": "plot-run-error", "expected": "visible" }
+      ],
+      "screenshots": ["run-error-permission.png"]
+    },
+    {
+      "id": "error-timeout",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-error-timeout",
+      "assertions": [
+        { "kind": "testid", "selector": "plot-run-error", "expected": "visible" }
+      ],
+      "screenshots": ["run-error-timeout.png"]
+    },
+    {
+      "id": "truncated",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-truncated",
+      "assertions": [
+        { "kind": "testid", "selector": "plot-run-truncated", "expected": "visible" }
+      ],
+      "screenshots": ["run-truncated.png"]
+    },
+    {
+      "id": "superseded",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-superseded",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-results-table", "expected": "visible" }
+      ],
+      "screenshots": ["run-superseded.png"]
+    },
+    {
+      "id": "empty-history",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/admin/ponder",
+      "scenario": "run-empty-history",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-history-empty", "expected": "visible" }
+      ],
+      "screenshots": ["run-empty-history.png"]
+    }
+  ]
+}
