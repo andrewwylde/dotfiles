@@ -43,7 +43,8 @@ A working `agent-sync` Rust CLI in this repo that owns an agent-neutral `library
 
 ## Follow-ons (after megaPR merge)
 
-- Tag `agent-sync-v*` to publish Release binaries (workflow already at `.github/workflows/agent-sync-release.yml`)
+- ~~Tag `agent-sync-v*`~~ — tagged `agent-sync-v0.1.0` on the andrew-parable fork; **push the same tag to `andrewwylde/dotfiles`** (needs andrewwylde write) so the release workflow builds assets on the canonical repo.
+- skills-cursor refresh: PR #9
 
 ## Out of scope
 
