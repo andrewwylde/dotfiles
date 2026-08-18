@@ -14,13 +14,48 @@ use crate::target::Target;
 pub fn run(config: &Config) -> Result<bool> {
     let library = Library::scan(config)?;
     let state = State::load(&config.state_file)?;
-    let mut valid = true;
-    let mut expected_paths = BTreeSet::new();
-
     for diagnostic in &library.diagnostics {
         eprintln!("WARN {}", diagnostic.message);
     }
-    for expected in sync::expected_markdown(config, &library)? {
+    let (mut valid, mut expected_paths) = verify_markdown(config, &library, &state)?;
+    print_unsupported(&library);
+
+    let packs = library
+        .items
+        .iter()
+        .filter(|item| item.kind == Kind::Hooks)
+        .collect::<Vec<_>>();
+    if !hooks::verify(config, &packs)? {
+        valid = false;
+    }
+    for path in hooks::expected_script_paths(config, &packs)? {
+        expected_paths.insert(path.clone());
+        if !state.owns(&path) {
+            eprintln!(
+                "ERROR {} is not recorded in {}",
+                path.display(),
+                config.state_file.display()
+            );
+            valid = false;
+        }
+    }
+
+    valid &= verify_state(config, &library, &state, &expected_paths);
+
+    if valid {
+        println!("OK verify passed");
+    }
+    Ok(valid)
+}
+
+fn verify_markdown(
+    config: &Config,
+    library: &Library,
+    state: &State,
+) -> Result<(bool, BTreeSet<std::path::PathBuf>)> {
+    let mut valid = true;
+    let mut expected_paths = BTreeSet::new();
+    for expected in sync::expected_markdown(config, library)? {
         if expected.excluded {
             println!(
                 "SKIP {}/{} -> {} (Manifest exclude)",
@@ -59,52 +94,59 @@ pub fn run(config: &Config) -> Result<bool> {
             );
             valid = false;
         }
-
-        let installed = fs::read_to_string(&expected.main_destination).with_context(|| {
-            format!(
-                "read installed markdown {}",
-                expected.main_destination.display()
-            )
-        })?;
-        if installed != expected.content {
-            eprintln!(
-                "ERROR content mismatch {}/{} -> {} at {}",
-                expected.kind,
-                expected.item_name,
-                expected.target,
-                expected.main_destination.display()
-            );
-            valid = false;
-        }
-
-        let metadata = fs::symlink_metadata(&expected.destination)
-            .with_context(|| format!("inspect {}", expected.destination.display()))?;
-        let parent_is_symlink = expected
-            .destination
-            .parent()
-            .and_then(|parent| fs::symlink_metadata(parent).ok())
-            .is_some_and(|parent| parent.file_type().is_symlink());
-        let should_copy = expected.target == Target::Cursor || parent_is_symlink;
-        if should_copy == metadata.file_type().is_symlink() {
-            eprintln!(
-                "ERROR wrong install mode for {}/{} -> {} at {}",
-                expected.kind,
-                expected.item_name,
-                expected.target,
-                expected.destination.display()
-            );
-            valid = false;
-        } else {
-            println!(
-                "OK {}/{} -> {} ({})",
-                expected.kind,
-                expected.item_name,
-                expected.target,
-                if should_copy { "copy" } else { "symlink" }
-            );
-        }
+        valid &= verify_content_and_mode(&expected)?;
     }
+    Ok((valid, expected_paths))
+}
 
+fn verify_content_and_mode(expected: &sync::ExpectedMarkdown) -> Result<bool> {
+    let installed = fs::read_to_string(&expected.main_destination).with_context(|| {
+        format!(
+            "read installed markdown {}",
+            expected.main_destination.display()
+        )
+    })?;
+    let mut valid = true;
+    if installed != expected.content {
+        eprintln!(
+            "ERROR content mismatch {}/{} -> {} at {}",
+            expected.kind,
+            expected.item_name,
+            expected.target,
+            expected.main_destination.display()
+        );
+        valid = false;
+    }
+    let metadata = fs::symlink_metadata(&expected.destination)
+        .with_context(|| format!("inspect {}", expected.destination.display()))?;
+    let parent_is_symlink = expected
+        .destination
+        .parent()
+        .and_then(|parent| fs::symlink_metadata(parent).ok())
+        .is_some_and(|parent| parent.file_type().is_symlink());
+    let should_copy = expected.target == Target::Cursor || parent_is_symlink;
+    if should_copy == metadata.file_type().is_symlink() {
+        eprintln!(
+            "ERROR wrong install mode for {}/{} -> {} at {}",
+            expected.kind,
+            expected.item_name,
+            expected.target,
+            expected.destination.display()
+        );
+        valid = false;
+    } else {
+        println!(
+            "OK {}/{} -> {} ({})",
+            expected.kind,
+            expected.item_name,
+            expected.target,
+            if should_copy { "copy" } else { "symlink" }
+        );
+    }
+    Ok(valid)
+}
+
+fn print_unsupported(library: &Library) {
     for item in &library.items {
         for target in Target::ALL {
             if !target.supports(item.kind) {
@@ -119,16 +161,15 @@ pub fn run(config: &Config) -> Result<bool> {
             }
         }
     }
+}
 
-    let packs = library
-        .items
-        .iter()
-        .filter(|item| item.kind == Kind::Hooks)
-        .collect::<Vec<_>>();
-    if !hooks::verify(config, &packs)? {
-        valid = false;
-    }
-
+fn verify_state(
+    config: &Config,
+    library: &Library,
+    state: &State,
+    expected_paths: &BTreeSet<std::path::PathBuf>,
+) -> bool {
+    let mut valid = true;
     if !library.items.is_empty() && !config.state_file.exists() {
         eprintln!("ERROR missing state file {}", config.state_file.display());
         valid = false;
@@ -138,14 +179,10 @@ pub fn run(config: &Config) -> Result<bool> {
             eprintln!("ERROR state path missing {}", entry.agent_path.display());
             valid = false;
         }
-        if entry.kind != "hooks" && !expected_paths.contains(&entry.agent_path) {
+        if !expected_paths.contains(&entry.agent_path) {
             eprintln!("ERROR stale state path {}", entry.agent_path.display());
             valid = false;
         }
     }
-
-    if valid {
-        println!("OK verify passed");
-    }
-    Ok(valid)
+    valid
 }

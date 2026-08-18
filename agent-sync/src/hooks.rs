@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -78,15 +78,15 @@ pub fn sync(
 pub fn verify(config: &Config, packs: &[&LibraryItem]) -> Result<bool> {
     let mut valid = true;
     for target in [Target::Claude, Target::Cursor] {
-        let expected = expected_tags(packs, target);
+        let expected = expected_managed(config, packs, target)?;
         let config_path = target
             .hooks_config(&config.target_home)
             .context("supported hook target must have a config path")?;
         let value = read_config(&config_path)?;
-        let actual = managed_tags(&value);
+        let actual = managed_entries(&value)?;
         if actual != expected {
             eprintln!(
-                "ERROR hooks {target}: managed tags differ in {}",
+                "ERROR hooks {target}: managed entries differ in {}",
                 config_path.display()
             );
             valid = false;
@@ -121,6 +121,31 @@ pub fn remove_managed(config: &Config) -> Result<()> {
         merge_config(config, target, BTreeMap::new(), false)?;
     }
     Ok(())
+}
+
+pub fn expected_script_paths(config: &Config, packs: &[&LibraryItem]) -> Result<Vec<PathBuf>> {
+    let mut paths = Vec::new();
+    for target in [Target::Claude, Target::Cursor] {
+        for pack in packs {
+            if pack.manifest.excludes(target)
+                || pack
+                    .manifest
+                    .hooks
+                    .get(&target)
+                    .is_none_or(BTreeMap::is_empty)
+            {
+                continue;
+            }
+            paths.extend(
+                script_plan(config, pack, target)?
+                    .into_iter()
+                    .map(|(_, destination, _)| destination),
+            );
+        }
+    }
+    paths.sort();
+    paths.dedup();
+    Ok(paths)
 }
 
 fn install_scripts(
@@ -302,8 +327,12 @@ fn merge_config(
     write_json_atomic(&path, &root)
 }
 
-fn expected_tags(packs: &[&LibraryItem], target: Target) -> BTreeSet<String> {
-    let mut tags = BTreeSet::new();
+fn expected_managed(
+    config: &Config,
+    packs: &[&LibraryItem],
+    target: Target,
+) -> Result<BTreeMap<String, Vec<Value>>> {
+    let mut managed: BTreeMap<String, Vec<Value>> = BTreeMap::new();
     for pack in packs {
         if pack.manifest.excludes(target) {
             continue;
@@ -311,30 +340,56 @@ fn expected_tags(packs: &[&LibraryItem], target: Target) -> BTreeSet<String> {
         let Some(events) = pack.manifest.hooks.get(&target) else {
             continue;
         };
+        let scripts = script_plan(config, pack, target)?;
+        let rewrites = scripts
+            .into_iter()
+            .map(|(source, destination, _)| (source, destination))
+            .collect::<Vec<_>>();
         for (event, entries) in events {
-            for ordinal in 0..entries.len() {
-                tags.insert(format!(
-                    "agent-sync:{}:{}:{event}:{ordinal}",
-                    pack.name, pack.manifest.version
-                ));
+            let output = managed.entry(event.clone()).or_default();
+            for (ordinal, entry) in entries.iter().enumerate() {
+                let mut entry = entry.clone();
+                rewrite_commands(&mut entry, &rewrites);
+                entry.insert(
+                    "_as".to_owned(),
+                    Value::String(format!(
+                        "agent-sync:{}:{}:{event}:{ordinal}",
+                        pack.name, pack.manifest.version
+                    )),
+                );
+                output.push(Value::Object(entry));
             }
         }
     }
-    tags
+    Ok(managed)
 }
 
-fn managed_tags(root: &Value) -> BTreeSet<String> {
-    root.get("hooks")
-        .and_then(Value::as_object)
-        .into_iter()
-        .flat_map(|hooks| hooks.values())
-        .filter_map(Value::as_array)
-        .flatten()
-        .filter_map(|entry| entry.get("_as"))
-        .filter_map(Value::as_str)
-        .filter(|tag| tag.starts_with(MANAGED_PREFIX))
-        .map(ToOwned::to_owned)
-        .collect()
+fn managed_entries(root: &Value) -> Result<BTreeMap<String, Vec<Value>>> {
+    let mut managed = BTreeMap::new();
+    let Some(hooks) = root.get("hooks") else {
+        return Ok(managed);
+    };
+    for (event, entries) in hooks
+        .as_object()
+        .context("hook config 'hooks' must be a JSON object")?
+    {
+        let entries = entries
+            .as_array()
+            .context("hook event value must be an array")?
+            .iter()
+            .filter(|entry| {
+                entry
+                    .get("_as")
+                    .and_then(Value::as_str)
+                    .is_some_and(|tag| tag.starts_with(MANAGED_PREFIX))
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        if !entries.is_empty() {
+            managed.insert(event.clone(), entries);
+        }
+    }
+    Ok(managed)
 }
 
 fn read_config(path: &Path) -> Result<Value> {

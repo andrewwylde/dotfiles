@@ -144,7 +144,6 @@ source = "cursor"
         .unwrap();
         let m = Manifest::load(dir.path()).unwrap();
         let o = m.overlay(Target::Cursor);
-        eprintln!("frontmatter = {:?}", o.frontmatter);
         assert!(
             o.frontmatter.is_mapping(),
             "expected mapping, got {:?}",
