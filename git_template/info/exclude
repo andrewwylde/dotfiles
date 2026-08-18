@@ -4,3 +4,6 @@
 # exclude patterns (uncomment them if you want to use them):
 # *.[oa]
 # *~
+.sc/
+.cursor/rules/superconductor-managed.mdc
+.kiro/agents/superconductor-managed.json

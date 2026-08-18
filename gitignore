@@ -20,3 +20,5 @@ tmp/**/*
 
 # Machine-local git config (rcup: ~/dotfiles-local/gitconfig.local)
 gitconfig.local
+
+**/.claude/settings.local.json

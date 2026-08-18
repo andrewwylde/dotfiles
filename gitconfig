@@ -16,6 +16,7 @@
   prune = true
 [rebase]
   autosquash = true
+  autoStash = true
 [pull]
   rebase = true
 [include]
