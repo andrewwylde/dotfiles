@@ -121,18 +121,8 @@ fn scan_actions(
     scan_target_kind(config, ".cursor", Kind::Commands, inventory, &mut actions)?;
     scan_target_kind(config, ".cursor", Kind::Agents, inventory, &mut actions)?;
 
-    let cursor_products = config.dotfiles_dir.join(".cursor/skills-cursor");
-    if install::path_exists(&cursor_products) {
-        actions.push(MigrationAction {
-            source: cursor_products,
-            destination: None,
-            disposition: Disposition::Abandon,
-            kind: Kind::Skills,
-            name: "skills-cursor".to_owned(),
-            note: "Cursor-managed product tree".to_owned(),
-            materialization: Materialization::Normal,
-        });
-    }
+    // skills-cursor stays in the clone as Cursor product content — never delete it.
+    // Inventory marks it abandon-for-migrate (do not Library / do not Fan-out).
 
     deduplicate(&mut actions)?;
     actions.sort_by(|left, right| left.source.cmp(&right.source));
