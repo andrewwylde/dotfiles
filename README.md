@@ -52,7 +52,72 @@ to link any new files and install new vim plugins. **Note** You _must_ run
 `rcup` after pulling to ensure that all files in plugins are properly installed,
 but you can safely run `rcup` multiple times so update early and update often!
 
-## Make your own customizations
+but you can safely run `rcup` multiple times so update early and update often!
+
+Claude Code and Cursor (agents, skills, commands)
+-------------------------------------------------
+
+Canonical Library lives under `library/{skills,commands,agents,hooks}/`.
+Fan-out to Claude Code, Cursor, OpenCode, and Pi with:
+
+    ~/dotfiles/bin/agent-sync sync
+    ~/dotfiles/bin/agent-sync verify
+    ~/dotfiles/bin/agent-sync list
+    ~/dotfiles/bin/agent-sync migrate --dry-run
+    ~/dotfiles/bin/agent-sync migrate --write
+
+Build (setup scripts do this too):
+
+    (cd ~/dotfiles/agent-sync && cargo build --release)
+    cp target/release/agent-sync ~/.local/bin/agent-sync
+
+`hooks/post-up` runs `agent-sync sync` after `rcup`. Legacy
+`bin/sync-ai-assistants` is a shim that prefers agent-sync, then falls back to
+`bin/sync-ai-assistants.legacy` (symlink installer) during migration.
+
+Parable-specific skills and scripts stay local (see `.gitignore`). Put
+work-only overrides in `~/dotfiles-local/library/` on each machine.
+
+See `agent-sync/README.md`, `CONTEXT.md`, and `.taskmaster/docs/wayfinder-agent-sync-map.md`.
+
+Platform setup scripts
+----------------------
+
+Run **one entry point**; it picks the right platform script:
+
+    ./setup.sh          # macOS, WSL, or Git Bash on Windows
+
+    # Native Windows PowerShell:
+    .\setup.ps1
+
+| Routed script | Platform |
+|---------------|----------|
+| `mac-setup.sh` | macOS |
+| `wsl-setup.sh` | WSL / Linux |
+| `windows-setup.ps1` | Windows host (via `setup.ps1`) |
+
+**Typical flows:**
+
+    # macOS
+    git clone https://github.com/andrewwylde/dotfiles.git ~/dotfiles
+    cd ~/dotfiles && ./setup.sh
+
+    # Windows → WSL
+    cd ~/dotfiles
+    .\setup.ps1
+    # or, after WSL is ready: ./setup.sh inside Ubuntu
+
+`wsl-setup.sh` writes identity to `~/dotfiles-local/gitconfig.local` and runs
+`rcup` for you. Put any other machine-only overrides there too.
+
+On macOS, `mac-setup.sh` installs tools first; run `rcup` afterward if the
+script did not already (or re-run `./setup.sh` after editing dotfiles).
+
+Open projects from the WSL path in Cursor (`\\wsl$\...`) so `~/.cursor/skills`
+symlinks resolve correctly. Homebrew-specific zsh config is skipped outside macOS.
+
+Make your own customizations
+----------------------------
 
 Create a directory for your personal customizations:
 
@@ -60,9 +125,9 @@ Create a directory for your personal customizations:
 
 Put your customizations in `~/dotfiles-local` appended with `.local`:
 
+- `~/dotfiles-local/gitconfig.local` — identity, 1Password SSH commit signing, credentials
 - `~/dotfiles-local/aliases.local`
 - `~/dotfiles-local/git_template.local/*`
-- `~/dotfiles-local/gitconfig.local`
 - `~/dotfiles-local/psqlrc.local` (we supply a blank `.psqlrc.local` to prevent `psql` from
   throwing an error, but you should overwrite the file with your own copy)
 - `~/dotfiles-local/tmux.conf.local`
@@ -78,13 +143,15 @@ For example, your `~/dotfiles-local/aliases.local` might look like this:
 
 Your `~/dotfiles-local/gitconfig.local` might look like this:
 
-    [alias]
-      l = log --pretty=colored
-    [pretty]
-      colored = format:%Cred%h%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset
     [user]
       name = Dan Croak
       email = dan@thoughtbot.com
+
+For 1Password SSH commit signing on macOS, also set `gpg.format = ssh`,
+`gpg.ssh.program` to 1Password's `op-ssh-sign`, and `user.signingkey` to your
+SSH public key. After removing tracked `gitconfig.local` from the repo, ensure
+`~/.gitconfig.local` points at `~/dotfiles-local/gitconfig.local` (run `rcup`,
+or `ln -sf ~/dotfiles-local/gitconfig.local ~/.gitconfig.local`).
 
 Your `~/dotfiles-local/vimrc.local` might look like this:
 

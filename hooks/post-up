@@ -1,5 +1,25 @@
 #!/bin/sh
 
+# Prefer agent-sync; fall back to legacy symlink sync during migration.
+DOTFILES="${DOTFILES_DIR:-$HOME/dotfiles}"
+if [ ! -d "$DOTFILES" ] && [ -d "$HOME/dotfiles-local" ]; then
+  DOTFILES="$HOME/dotfiles-local"
+fi
+
+if [ -x "$HOME/.local/bin/agent-sync" ]; then
+  DOTFILES_DIR="$DOTFILES" "$HOME/.local/bin/agent-sync" sync \
+    || echo "agent-sync sync failed (see above)" >&2
+elif [ -x "$DOTFILES/bin/agent-sync" ]; then
+  DOTFILES_DIR="$DOTFILES" "$DOTFILES/bin/agent-sync" sync \
+    || echo "agent-sync sync failed (see above)" >&2
+elif [ -x "$HOME/dotfiles-local/bin/sync-ai-assistants" ]; then
+  DOTFILES_DIR="$HOME/dotfiles-local" "$HOME/dotfiles-local/bin/sync-ai-assistants" \
+    || echo "sync-ai-assistants failed (see above)" >&2
+elif [ -x "$HOME/dotfiles/bin/sync-ai-assistants" ]; then
+  DOTFILES_DIR="$HOME/dotfiles" "$HOME/dotfiles/bin/sync-ai-assistants" \
+    || echo "sync-ai-assistants failed (see above)" >&2
+fi
+
 touch "$HOME"/.psqlrc.local
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
