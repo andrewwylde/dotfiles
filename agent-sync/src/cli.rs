@@ -19,6 +19,8 @@ pub enum Command {
     List(RootArgs),
     /// Move legacy per-Target trees into the Library.
     Migrate(MigrateArgs),
+    /// Detect (and optionally fix) legacy home→repo Target symlinks.
+    Doctor(DoctorArgs),
 }
 
 #[derive(Debug, Args)]
@@ -65,6 +67,17 @@ pub struct MigrateArgs {
     /// Restore a timestamped migration backup.
     #[arg(long, value_name = "ID", conflicts_with_all = ["dry_run", "write"])]
     pub rollback: Option<String>,
+
+    /// Override the Target home base (for sandboxes and tests).
+    #[arg(long, value_name = "SANDBOX")]
+    pub root: Option<PathBuf>,
+}
+
+#[derive(Debug, Args)]
+pub struct DoctorArgs {
+    /// Replace legacy home→repo symlinks with empty real directories.
+    #[arg(long)]
+    pub fix: bool,
 
     /// Override the Target home base (for sandboxes and tests).
     #[arg(long, value_name = "SANDBOX")]

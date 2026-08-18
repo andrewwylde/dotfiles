@@ -46,7 +46,7 @@ pub fn run(config: &Config, dry_run: bool) -> Result<()> {
     for expected in expected_items {
         if expected.excluded {
             println!(
-                "SKIP {}/{} -> {} (Manifest exclude)",
+                "SKIP {}/{} -> {} (excluded)",
                 expected.kind, expected.item_name, expected.target
             );
             continue;
@@ -147,6 +147,12 @@ fn print_unsupported(library: &Library) {
 }
 
 pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<ExpectedMarkdown>> {
+    let skill_names = library
+        .items
+        .iter()
+        .filter(|item| item.kind == Kind::Skills)
+        .map(|item| item.name.clone())
+        .collect::<BTreeSet<_>>();
     let mut expected = Vec::new();
     for item in &library.items {
         if item.kind == Kind::Hooks {
@@ -162,6 +168,11 @@ pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<Expec
             if !target.supports(item.kind) {
                 continue;
             }
+            // Cursor installs commands into the skills tree; skip when a skill
+            // already owns that fan-out name so verify/sync do not thrash.
+            let cursor_command_shadowed = item.kind == Kind::Commands
+                && target == Target::Cursor
+                && skill_names.contains(&item.name);
             let destination = target
                 .destination(&config.target_home, item.kind, &fanout_name)
                 .context("supported target must have a destination")?;
@@ -174,7 +185,7 @@ pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<Expec
                 destination,
                 main_destination,
                 content: overlay::apply(&source, &item.manifest.overlay(target))?,
-                excluded: item.manifest.excludes(target),
+                excluded: item.manifest.excludes(target) || cursor_command_shadowed,
             });
         }
     }

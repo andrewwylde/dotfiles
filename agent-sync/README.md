@@ -20,6 +20,8 @@ agent-sync list
 agent-sync sync --dry-run
 agent-sync sync
 agent-sync verify
+agent-sync doctor
+agent-sync doctor --fix
 agent-sync migrate --dry-run
 agent-sync migrate --write
 agent-sync migrate --rollback <backup-id>
@@ -39,6 +41,15 @@ Target/kind combinations are reported and skipped.
 Do not run `npx skills remove --all -y` unattended: it scans Target
 directories and can delete `andrew-*` fan-outs; recover them with
 `agent-sync sync`.
+
+## Legacy home → repo symlinks
+
+Older layouts often symlink `~/.claude/skills` (and Cursor/commands/agents
+counterparts) into this clone. Fan-out must land in real `$HOME`
+directories. `agent-sync doctor` detects those links; `--fix` replaces them
+with empty real directories (then run `sync`). Product `~/.cursor/skills-cursor`
+may stay linked into the clone. Installs into the clone outside `library/`
+are refused.
 
 ## Library layout
 

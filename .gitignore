@@ -6,8 +6,6 @@ git_template/
 # Keep most of bin/ ignored, but allow explicit scripts to be tracked.
 bin/*
 !bin/install-commitizen
-!bin/sync-ai-assistants
-!bin/sync-ai-assistants.legacy
 !bin/agent-sync
 !bin/leak-check.sh
 !bin/git-*

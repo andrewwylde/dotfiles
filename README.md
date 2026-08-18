@@ -63,17 +63,18 @@ Fan-out to Claude Code, Cursor, OpenCode, and Pi with:
     ~/dotfiles/bin/agent-sync sync
     ~/dotfiles/bin/agent-sync verify
     ~/dotfiles/bin/agent-sync list
+    ~/dotfiles/bin/agent-sync doctor
     ~/dotfiles/bin/agent-sync migrate --dry-run
-    ~/dotfiles/bin/agent-sync migrate --write
 
 Build (setup scripts do this too):
 
     (cd ~/dotfiles/agent-sync && cargo build --release)
     cp target/release/agent-sync ~/.local/bin/agent-sync
 
-`hooks/post-up` runs `agent-sync sync` after `rcup`. Legacy
-`bin/sync-ai-assistants` is a shim that prefers agent-sync, then falls back to
-`bin/sync-ai-assistants.legacy` (symlink installer) during migration.
+`hooks/post-up` runs `agent-sync sync` after `rcup`. Installs land under
+`$HOME`, not back into this clone. If an older layout left
+`~/.claude/skills` (etc.) symlinked into the repo, run
+`agent-sync doctor --fix` then `agent-sync sync`.
 
 Parable-specific skills and scripts stay local (see `.gitignore`). Put
 work-only overrides in `~/dotfiles-local/library/` on each machine.

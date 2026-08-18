@@ -169,22 +169,7 @@ run_agent_sync() {
   fi
 }
 
-# Legacy name — prefer agent-sync; fall back to symlink installer during transition.
+# Compat alias for older setup scripts.
 run_sync_ai_assistants() {
-  local dotfiles_dir="$1"
-  if [[ -x "${HOME}/.local/bin/agent-sync" ]] \
-    || [[ -x "${dotfiles_dir}/bin/agent-sync" ]] \
-    || [[ -x "${dotfiles_dir}/agent-sync/target/release/agent-sync" ]]; then
-    run_agent_sync "${dotfiles_dir}" 1
-    return 0
-  fi
-  local sync="${dotfiles_dir}/bin/sync-ai-assistants"
-  if [[ ! -x "$sync" ]]; then
-    log_warn "neither agent-sync nor sync-ai-assistants found; skipping"
-    return 0
-  fi
-
-  log_info "Syncing Claude/Cursor harness (legacy sync-ai-assistants)..."
-  DOTFILES_DIR="$dotfiles_dir" "$sync"
-  DOTFILES_DIR="$dotfiles_dir" "$sync" --verify
+  run_agent_sync "$1" 1
 }

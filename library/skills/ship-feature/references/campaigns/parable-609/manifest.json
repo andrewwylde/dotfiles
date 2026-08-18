@@ -1,0 +1,120 @@
+{
+  "campaign": "PARABLE-609",
+  "title": "Parables: Core Components",
+  "parent_url": "https://linear.app/parable-work/issue/PARABLE-609/parables-core-components",
+  "reference_branch": "ponder-admin",
+  "reference_worktree_hint": "/Users/andrewwylde/.cursor/worktrees/parable-platform/3fmc",
+  "reference_sha_pinned": "c50e90ddf44616d1ff12784a292b7fdd8de0b1fa",
+  "main_baseline_sha_pinned": "ff15001aac801514839261f8c6acd9c830979117",
+  "visual_url": "https://local.parable.work:5300/admin/ponder",
+  "harness_worktree": "/Users/andrewwylde/.agent/worktrees/parable-ponder-harness",
+  "harness_route": "/dev/ponder",
+  "harness_notes": "/Users/andrewwylde/.agent/notes/parable-ponder-harness.md",
+  "schema_stack_tip": "origin/bug/parable-269-compose-hardening",
+  "git_base": "origin/main",
+  "children_meta": {
+    "PARABLE-641": {
+      "schema_tier": 0,
+      "harness_region": "editor",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-644": {
+      "schema_tier": 0,
+      "harness_region": "property",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-616": {
+      "schema_tier": 0,
+      "harness_region": "identity",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-633": {
+      "schema_tier": 0,
+      "harness_region": "identity",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-632": {
+      "schema_tier": 0,
+      "harness_region": "identity",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-637": {
+      "schema_tier": 0,
+      "harness_region": "identity",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-638": {
+      "schema_tier": 0,
+      "harness_region": "identity",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-631": {
+      "schema_tier": 0,
+      "harness_region": "tree",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-636": {
+      "schema_tier": 0,
+      "harness_region": "bottomPane",
+      "pr_base": "origin/main"
+    },
+    "PARABLE-640": {
+      "schema_tier": 0,
+      "harness_region": "editor",
+      "pr_base": "origin/main"
+    }
+  },
+  "prd_files": [
+    "stories/overview.md",
+    "stories/name-handle-component.md",
+    "stories/propose-publish-resolve-conflicts.md"
+  ],
+  "children": [
+    "PARABLE-641",
+    "PARABLE-644",
+    "PARABLE-616",
+    "PARABLE-633",
+    "PARABLE-632",
+    "PARABLE-637",
+    "PARABLE-638",
+    "PARABLE-631",
+    "PARABLE-636",
+    "PARABLE-640"
+  ],
+  "ship_order": [
+    "PARABLE-641",
+    "PARABLE-644",
+    "PARABLE-616",
+    "PARABLE-633",
+    "PARABLE-632",
+    "PARABLE-637",
+    "PARABLE-638",
+    "PARABLE-631",
+    "PARABLE-636",
+    "PARABLE-640"
+  ],
+  "reference_paths": [
+    "apps/web-app/src/routes/admin/ponder/+page.svelte",
+    "apps/web-app/src/routes/admin/ponder/+page.server.ts",
+    "apps/web-app/src/lib/domains/plots/components/ponder-admin-page/PonderAdminPage.component.svelte",
+    "apps/web-app/src/lib/domains/plots/components/ponder-admin-page/PonderAdminPage.component.test.ts",
+    "apps/web-app/src/lib/domains/plots/components/monaco-sql-editor",
+    "apps/web-app/src/lib/domains/plots/components/sql-pane-editor",
+    "apps/web-app/src/lib/domains/plots/components/tree-list",
+    "apps/web-app/src/lib/domains/plots/components/piece",
+    "apps/web-app/src/lib/domains/admin/components/bottom-pane",
+    "apps/web-app/src/lib/domains/plots/types/plots.types.ts",
+    "apps/web-app/src/lib/domains/plots/utils/package-mapping.logic.ts",
+    "apps/web-app/src/lib/domains/plots/utils/plots.versioning.service.ts"
+  ],
+  "scaffold_never_promote": [
+    "apps/web-app/src/lib/domains/plots/types/plots.types.ts",
+    "apps/web-app/src/lib/domains/plots/utils/package-mapping.logic.ts",
+    "ParablePackageLike",
+    "ParableTemplatesSdkLike",
+    "localStorage PARABLES_STORAGE_KEY",
+    "platform-schemas/schemas/web-admin-api/parable-templates (legacy GraphQL)"
+  ],
+  "state_root": "~/.cursor/ship-feature-state/parable-609",
+  "last_author_verified": "2026-07-15"
+}
