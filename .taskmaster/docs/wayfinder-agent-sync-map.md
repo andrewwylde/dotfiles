@@ -43,7 +43,7 @@ A working `agent-sync` Rust CLI in this repo that owns an agent-neutral `library
 
 ## Follow-ons (after megaPR merge)
 
-- Tag `agent-sync-v*` to publish Release binaries (workflow: `.github/workflows/agent-sync-release.yml`)
+- Tag `agent-sync-v*` to publish Release binaries (workflow already at `.github/workflows/agent-sync-release.yml`)
 
 ## Out of scope
 
