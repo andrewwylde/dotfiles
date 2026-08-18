@@ -41,10 +41,9 @@ A working `agent-sync` Rust CLI in this repo that owns an agent-neutral `library
 - Release signing / attestation (optional)
 - Tombstone on-disk marker exact path (behavior locked)
 
-## Follow-ons (before megaPR)
+## Follow-ons (after megaPR merge)
 
-- Copy `agent-sync/ci/agent-sync-release.yml` → `.github/workflows/` when the push token has `workflow` scope; tag `agent-sync-v*`
-- Open one megaPR `sync/harness-and-tools` → `main`
+- Tag `agent-sync-v*` to publish Release binaries (workflow: `.github/workflows/agent-sync-release.yml`)
 
 ## Out of scope
 
