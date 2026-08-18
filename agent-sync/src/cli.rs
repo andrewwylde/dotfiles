@@ -40,6 +40,7 @@ pub struct RootArgs {
 }
 
 #[derive(Debug, Args)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct MigrateArgs {
     /// Print the migration plan without mutating files.
     #[arg(long, conflicts_with_all = ["write", "rollback"])]
