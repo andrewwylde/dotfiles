@@ -20,6 +20,8 @@ agent-sync list
 agent-sync sync --dry-run
 agent-sync sync
 agent-sync verify
+agent-sync doctor
+agent-sync doctor --fix
 agent-sync migrate --dry-run
 agent-sync migrate --write
 agent-sync migrate --rollback <backup-id>
@@ -42,11 +44,12 @@ directories and can delete `andrew-*` fan-outs; recover them with
 
 ## Legacy home → repo symlinks
 
-Older `sync-ai-assistants` layouts often symlink `~/.claude/skills` (and
-Cursor/commands/agents counterparts) into this clone. Fan-out must land in
-real `$HOME` directories, not the git tree. If those links still exist, replace
-them with real directories, then `agent-sync sync` again. `agent-sync` refuses
-to install into the clone outside `library/`.
+Older layouts often symlink `~/.claude/skills` (and Cursor/commands/agents
+counterparts) into this clone. Fan-out must land in real `$HOME`
+directories. `agent-sync doctor` detects those links; `--fix` replaces them
+with empty real directories (then run `sync`). Product `~/.cursor/skills-cursor`
+may stay linked into the clone. Installs into the clone outside `library/`
+are refused.
 
 ## Library layout
 

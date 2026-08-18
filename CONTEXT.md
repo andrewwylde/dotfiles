@@ -25,8 +25,8 @@ Installing one Library item into one or more Targets via generate-then-link-or-c
 _Avoid_: Sync (too broad alone), mirror, rsync
 
 **Sync tool**:
-The `agent-sync` CLI that generates Wrappers and fans the Library out to Targets; coexists with `npx skills` for third-party installs.
-_Avoid_: sync-ai-assistants (legacy), skills CLI (ambiguous with npx)
+The `agent-sync` CLI that generates Wrappers and fans the Library out to Targets; coexists with `npx skills` for third-party installs. Commands: `sync`, `verify`, `list`, `migrate`, `doctor`.
+_Avoid_: sync-ai-assistants (deleted), skills CLI (ambiguous with npx)
 
 **Manifest**:
 Per-item opt-in `manifest.toml` in the Library that names exclusions, overlays, and (for hooks) pack entrypoints. Missing Manifest means fan out to all valid Targets with no overlay.

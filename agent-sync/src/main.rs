@@ -1,5 +1,6 @@
 mod cli;
 mod config;
+mod doctor;
 mod frontmatter;
 mod hooks;
 mod install;
@@ -41,6 +42,10 @@ fn main() -> Result<()> {
         Command::Migrate(args) => {
             let config = Config::discover(args.root.clone())?;
             migrate::run(&config, &args)
+        }
+        Command::Doctor(args) => {
+            let config = Config::discover(args.root)?;
+            doctor::run(&config, args.fix)
         }
     }
 }

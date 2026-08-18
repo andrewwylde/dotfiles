@@ -26,26 +26,25 @@ A working `agent-sync` Rust CLI in this repo that owns an agent-neutral `library
 - Manifest — opt-in `manifest.toml`; dir-per-item; exclude-only; frontmatter deep-merge + `body_append`; see [locked-manifest-schema.md](./locked-manifest-schema.md)
 - Local-wins — whole-item replace + tombstones; local > in-clone private > public
 - Migrate UX — `--dry-run`|`--write`; backups + explicit `--rollback`
-- Setup — mac+WSL install via common.sh; mac-setup rcup/sync parity; shim then delete `sync-ai-assistants`
+- Setup — mac+WSL install via common.sh; mac-setup rcup/sync parity; `sync-ai-assistants` deleted after migrate cutover
 - Migration — one-shot into Library; stop versioning per-Target trees
-- CLI — Rust; `sync` / `verify` / `migrate` / `list`; Release binaries + cargo fallback
+- CLI — Rust; `sync` / `verify` / `migrate` / `list` / `doctor`; Release binaries + cargo fallback
 - Output — Target home dirs only
 - Hooks — tagged `_as` merge; packs in Library
 - Third-party — `npx skills`
 - Research + inventory — see prior task answers / `.taskmaster/docs/research-*.md` + [inventory-migrate-scope.md](./inventory-migrate-scope.md)
 - [Prototype one skill fan-out to two Targets](../tasks/tasks.json) — shape accepted; see [prototype-one-skill-fan-out.md](./prototype-one-skill-fan-out.md)
+- Production migrate — Library populated; dual trees emptied in clone; home Target dirs detached from repo symlinks
 
 ## Not yet specified
 
 - Release signing / attestation (optional)
 - Tombstone on-disk marker exact path (behavior locked)
 
-## Follow-ons (post build)
+## Follow-ons (before megaPR)
 
 - Copy `agent-sync/ci/agent-sync-release.yml` → `.github/workflows/` when the push token has `workflow` scope; tag `agent-sync-v*`
-- Merge `sync/harness-and-tools` → `main`
-- Delete `bin/sync-ai-assistants` shim after cutover
-- Detach any remaining `~/.claude` / `~/.cursor` trees that still symlink into the clone (product `skills-cursor/` may stay)
+- Open one megaPR `sync/harness-and-tools` → `main`
 
 ## Out of scope
 
