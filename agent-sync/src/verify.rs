@@ -120,10 +120,10 @@ fn verify_content_and_mode(expected: &sync::ExpectedMarkdown) -> Result<bool> {
     let metadata = fs::symlink_metadata(&expected.destination)
         .with_context(|| format!("inspect {}", expected.destination.display()))?;
 
-    // For Pi we prefer symlinks, but accept copies when symlink creation is
-    // not permitted in the current environment (e.g. Windows privilege gaps).
+    // On Windows or for Pi, symlink creation may not be permitted (privilege gaps),
+    // so copy mode is accepted as long as content matches.
     let installed_is_symlink = metadata.file_type().is_symlink();
-    if expected.target == Target::Pi {
+    if cfg!(windows) || expected.target == Target::Pi {
         println!(
             "OK {}/{} -> {} ({})",
             expected.kind,
@@ -131,7 +131,7 @@ fn verify_content_and_mode(expected: &sync::ExpectedMarkdown) -> Result<bool> {
             expected.target,
             if installed_is_symlink { "symlink" } else { "copy" }
         );
-        return Ok(true);
+        return Ok(valid);
     }
 
     let parent_is_symlink = expected
