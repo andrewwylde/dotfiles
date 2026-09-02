@@ -139,7 +139,9 @@ fn verify_content_and_mode(expected: &sync::ExpectedMarkdown) -> Result<bool> {
         .parent()
         .and_then(|parent| fs::symlink_metadata(parent).ok())
         .is_some_and(|parent| parent.file_type().is_symlink());
-    let should_copy = expected.target == Target::Cursor || parent_is_symlink;
+    let should_copy = expected.target == Target::Cursor
+        || expected.target == Target::Antigravity
+        || parent_is_symlink;
 
     if should_copy == installed_is_symlink {
         eprintln!(

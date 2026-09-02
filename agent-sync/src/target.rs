@@ -14,10 +14,17 @@ pub enum Target {
     Cursor,
     Opencode,
     Pi,
+    Antigravity,
 }
 
 impl Target {
-    pub const ALL: [Self; 4] = [Self::Claude, Self::Cursor, Self::Opencode, Self::Pi];
+    pub const ALL: [Self; 5] = [
+        Self::Claude,
+        Self::Cursor,
+        Self::Opencode,
+        Self::Pi,
+        Self::Antigravity,
+    ];
 
     #[must_use]
     pub const fn id(self) -> &'static str {
@@ -26,6 +33,7 @@ impl Target {
             Self::Cursor => "cursor",
             Self::Opencode => "opencode",
             Self::Pi => "pi",
+            Self::Antigravity => "antigravity",
         }
     }
 
@@ -35,6 +43,7 @@ impl Target {
             Self::Claude | Self::Cursor => true,
             Self::Opencode => !matches!(kind, Kind::Hooks),
             Self::Pi => matches!(kind, Kind::Skills),
+            Self::Antigravity => matches!(kind, Kind::Skills | Kind::Commands),
         }
     }
 
@@ -49,6 +58,8 @@ impl Target {
             (Self::Pi, Kind::Commands) => "commands are unsupported",
             (Self::Pi, Kind::Agents) => "agents are unsupported",
             (Self::Pi, Kind::Hooks) => "hooks are unsupported",
+            (Self::Antigravity, Kind::Agents) => "agents are unsupported",
+            (Self::Antigravity, Kind::Hooks) => "hooks are unsupported",
             _ => "kind is unsupported",
         })
     }
@@ -79,6 +90,9 @@ impl Target {
                 .join(".config/opencode/agents")
                 .join(format!("{fanout_name}.md")),
             (Self::Pi, Kind::Skills) => home.join(".pi/agent/skills").join(fanout_name),
+            (Self::Antigravity, Kind::Skills | Kind::Commands) => {
+                home.join(".gemini/config/skills").join(fanout_name)
+            }
             _ => return None,
         };
         Some(path)
@@ -89,7 +103,7 @@ impl Target {
         match self {
             Self::Claude => Some(home.join(".claude/settings.json")),
             Self::Cursor => Some(home.join(".cursor/hooks.json")),
-            Self::Opencode | Self::Pi => None,
+            Self::Opencode | Self::Pi | Self::Antigravity => None,
         }
     }
 
@@ -98,7 +112,7 @@ impl Target {
         match self {
             Self::Claude => Some(home.join(".claude/hooks")),
             Self::Cursor => Some(home.join(".cursor/hooks")),
-            Self::Opencode | Self::Pi => None,
+            Self::Opencode | Self::Pi | Self::Antigravity => None,
         }
     }
 }
@@ -118,6 +132,7 @@ impl FromStr for Target {
             "cursor" => Ok(Self::Cursor),
             "opencode" => Ok(Self::Opencode),
             "pi" => Ok(Self::Pi),
+            "antigravity" | "gemini" => Ok(Self::Antigravity),
             "agents" => bail!("target 'agents' is reserved and not supported in v1"),
             other => bail!("unknown target '{other}'"),
         }

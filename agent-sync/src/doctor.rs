@@ -12,6 +12,7 @@ const MANAGED_RELS: &[&str] = &[
     ".cursor/skills",
     ".cursor/commands",
     ".cursor/agents",
+    ".gemini/config/skills",
 ];
 
 /// Product tree that may stay symlinked into the clone.

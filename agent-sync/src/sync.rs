@@ -57,7 +57,7 @@ pub fn run(config: &Config, dry_run: bool) -> Result<()> {
             materialize_wrapper(&expected, &wrapper_source)?;
         }
         desired_paths.insert(expected.destination.clone());
-        let preferred = if expected.target == Target::Cursor {
+        let preferred = if expected.target == Target::Cursor || expected.target == Target::Antigravity {
             InstallMode::Copy
         } else {
             InstallMode::Symlink
@@ -171,10 +171,10 @@ pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<Expec
             if !target.supports(item.kind) {
                 continue;
             }
-            // Cursor installs commands into the skills tree; skip when a skill
+            // Cursor and Antigravity install commands into the skills tree; skip when a skill
             // already owns that fan-out name so verify/sync do not thrash.
-            let cursor_command_shadowed = item.kind == Kind::Commands
-                && target == Target::Cursor
+            let command_shadowed = item.kind == Kind::Commands
+                && (target == Target::Cursor || target == Target::Antigravity)
                 && skill_names.contains(&item.name);
             let destination = target
                 .destination(&config.target_home, item.kind, &fanout_name)
@@ -196,7 +196,7 @@ pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<Expec
                 destination,
                 main_destination,
                 content,
-                excluded: item.manifest.excludes(target) || cursor_command_shadowed,
+                excluded: item.manifest.excludes(target) || command_shadowed,
             });
         }
     }
@@ -204,7 +204,10 @@ pub fn expected_markdown(config: &Config, library: &Library) -> Result<Vec<Expec
 }
 
 fn destination_main(destination: &Path, kind: Kind, target: Target) -> PathBuf {
-    if kind == Kind::Skills || (kind == Kind::Commands && target == Target::Cursor) {
+    if kind == Kind::Skills
+        || (kind == Kind::Commands
+            && (target == Target::Cursor || target == Target::Antigravity))
+    {
         destination.join("SKILL.md")
     } else {
         destination.to_path_buf()
@@ -235,7 +238,8 @@ fn wrapper_source(config: &Config, expected: &ExpectedMarkdown) -> PathBuf {
 fn materialize_wrapper(expected: &ExpectedMarkdown, wrapper: &Path) -> Result<()> {
     install::remove_path(wrapper)?;
     let directory_install = expected.kind == Kind::Skills
-        || (expected.kind == Kind::Commands && expected.target == Target::Cursor);
+        || (expected.kind == Kind::Commands
+            && (expected.target == Target::Cursor || expected.target == Target::Antigravity));
     if directory_install {
         install::copy_path(&expected.source_root, wrapper)?;
         install::remove_path(&wrapper.join("manifest.toml"))?;
