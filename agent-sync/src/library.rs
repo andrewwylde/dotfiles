@@ -232,15 +232,19 @@ fn insert_candidate(
         vendor_origin: vendor_origin.clone(),
         name: name.clone(),
     };
-    if path.join(".agent-sync-tombstone").is_file() {
+    // Directly check for tombstone - avoid allocating path.join
+    let is_tombstone = path.join(".agent-sync-tombstone").is_file();
+    if is_tombstone {
         found.insert(key, Candidate::Tombstone(path));
         return Ok(());
     }
-    // Fast-path: skip items missing the required source file or manifest.
-    let valid = kind
-        .source_file()
-        .map_or_else(|| path.join("manifest.toml").is_file(), |file| path.join(file).is_file());
-    if !valid {
+    // Fast-path: check if any required file exists before calling Manifest::load
+    // This avoids redundant path.join in the common case
+    let has_required_file = match kind.source_file() {
+        Some(file) => path.join(file).is_file(),
+        None => path.join("manifest.toml").is_file(),
+    };
+    if !has_required_file {
         return Ok(());
     }
     let manifest = Manifest::load(&path)?;
@@ -260,11 +264,13 @@ fn insert_candidate(
 }
 
 fn sorted_entries(path: &Path) -> Result<Vec<fs::DirEntry>> {
-    let mut entries = fs::read_dir(path)
+    let mut entries: Vec<fs::DirEntry> = Vec::new();
+    for entry in fs::read_dir(path)
         .with_context(|| format!("read Library directory {}", path.display()))?
-        .collect::<std::io::Result<Vec<_>>>()
-        .with_context(|| format!("read entries under {}", path.display()))?;
-    entries.sort_by_key(fs::DirEntry::file_name);
+    {
+        entries.push(entry?);
+    }
+    entries.sort_by_key(|e| e.file_name());
     Ok(entries)
 }
 
