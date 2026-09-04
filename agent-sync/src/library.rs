@@ -236,10 +236,10 @@ fn insert_candidate(
         found.insert(key, Candidate::Tombstone(path));
         return Ok(());
     }
-    let valid = kind.source_file().map_or_else(
-        || path.join("manifest.toml").is_file(),
-        |file| path.join(file).is_file(),
-    );
+    // Fast-path: skip items missing the required source file or manifest.
+    let valid = kind
+        .source_file()
+        .map_or_else(|| path.join("manifest.toml").is_file(), |file| path.join(file).is_file());
     if !valid {
         return Ok(());
     }
