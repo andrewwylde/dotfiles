@@ -266,7 +266,8 @@ fn insert_candidate(
 }
 
 fn sorted_entries(path: &Path) -> Result<Vec<fs::DirEntry>> {
-    let mut entries: Vec<fs::DirEntry> = Vec::new();
+    // Pre-allocate with capacity hint to reduce Vec reallocations
+    let mut entries: Vec<fs::DirEntry> = Vec::with_capacity(32);
     for entry in fs::read_dir(path)
         .with_context(|| format!("read Library directory {}", path.display()))?
     {
