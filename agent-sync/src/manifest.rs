@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
 use std::path::Path;
 use std::str::FromStr;
@@ -44,6 +44,26 @@ struct RawOverlay {
 }
 
 impl Manifest {
+    // Simple static cache for manifest files to avoid re-parsing
+    // Most library items don't have manifest.toml (only 2 of 261 original)
+    pub fn load_cached(item_root: &Path) -> Result<Self> {
+        use std::sync::Mutex;
+        lazy_static::lazy_static! {
+            static ref CACHE: Mutex<HashMap<String, Manifest>> = Mutex::new(HashMap::new());
+        }
+        let path_str = item_root.to_string_lossy().into_owned();
+        if let Ok(cache) = CACHE.lock() {
+            if let Some(manifest) = cache.get(&path_str) {
+                return Ok(manifest.clone());
+            }
+        }
+        let manifest = Self::load(item_root)?;
+        if let Ok(mut cache) = CACHE.lock() {
+            cache.insert(path_str, manifest.clone());
+        }
+        Ok(manifest)
+    }
+
     pub fn load(item_root: &Path) -> Result<Self> {
         let path = item_root.join("manifest.toml");
         if !path.exists() {

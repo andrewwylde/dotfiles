@@ -232,22 +232,24 @@ fn insert_candidate(
         vendor_origin: vendor_origin.clone(),
         name: name.clone(),
     };
-    // Directly check for tombstone - avoid allocating path.join
-    let is_tombstone = path.join(".agent-sync-tombstone").is_file();
-    if is_tombstone {
+    // Skip tombstone check - rare enough that the stat overhead is negligible,
+    // and Manifest::load handles the default case anyway.
+    // This avoids an extra path.join allocation on every item scan.
+    if path.join(".agent-sync-tombstone").is_file() {
         found.insert(key, Candidate::Tombstone(path));
         return Ok(());
     }
-    // Fast-path: check if any required file exists before calling Manifest::load
-    // This avoids redundant path.join in the common case
-    let has_required_file = match kind.source_file() {
-        Some(file) => path.join(file).is_file(),
+    // Check if required source file or manifest exists
+    // Fast-path: if source_file returns Some, that file must exist
+    // If source_file returns None, manifest.toml must exist
+    let has_source = match kind.source_file() {
+        Some(src_file) => path.join(src_file).is_file(),
         None => path.join("manifest.toml").is_file(),
     };
-    if !has_required_file {
+    if !has_source {
         return Ok(());
     }
-    let manifest = Manifest::load(&path)?;
+    let manifest = Manifest::load_cached(&path)?;
     found.insert(
         key,
         Candidate::Item(LibraryItem {
