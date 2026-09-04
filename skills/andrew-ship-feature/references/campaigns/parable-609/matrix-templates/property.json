@@ -1,0 +1,17 @@
+{
+  "ticket": "PARABLE-644",
+  "region": "property",
+  "rows": [
+    {
+      "id": "desktop-default",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder",
+      "region": "property",
+      "assertions": [
+        { "kind": "testid", "selector": "ponder-region-property", "expected": "visible" }
+      ],
+      "screenshots": ["property-desktop-default.png"]
+    }
+  ]
+}

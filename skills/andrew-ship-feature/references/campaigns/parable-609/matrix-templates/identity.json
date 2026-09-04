@@ -1,0 +1,17 @@
+{
+  "ticket": "PARABLE-616",
+  "region": "identity",
+  "rows": [
+    {
+      "id": "desktop-default",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder",
+      "region": "identity",
+      "assertions": [
+        { "kind": "testid", "selector": "ponder-region-identity", "expected": "visible" }
+      ],
+      "screenshots": ["identity-desktop-default.png"]
+    }
+  ]
+}

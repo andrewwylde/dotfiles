@@ -1,0 +1,44 @@
+{
+  "campaign": "PARABLE-613",
+  "title": "Parables: Authoring and Lifecycle",
+  "parent_url": "https://linear.app/parable-work/issue/PARABLE-613/parables-authoring-and-lifecycle",
+  "reference_branch": "ponder-admin",
+  "reference_worktree_hint": "/Users/andrewwylde/.cursor/worktrees/parable-platform/3fmc",
+  "visual_url": "http://127.0.0.1:5173/admin/ponder",
+  "harness_route": "/admin/ponder",
+  "harness_notes": "/Users/andrewwylde/.agent/notes/parable-ponder-harness.md",
+  "default_harness_kind": "app_route",
+  "git_base": "origin/feature/parable-editor",
+  "stack_host": "origin/feature/parable-editor",
+  "children_meta": {
+    "PARABLE-1045": {
+      "schema_tier": 0,
+      "harness_kind": "app_route",
+      "harness_path": "/admin/ponder",
+      "spec_path": "apps/web-app/e2e/admin-ponder/run-results.spec.ts",
+      "pr_base": "origin/feature/parable-editor",
+      "matrix_template": "run"
+    }
+  },
+  "prd_files": [],
+  "children": [
+    "PARABLE-1045"
+  ],
+  "ship_order": [
+    "PARABLE-1045"
+  ],
+  "reference_paths": [
+    "apps/web-app/src/routes/admin/ponder/+page.svelte",
+    "apps/web-app/src/routes/admin/ponder/[parableSlug]/+page.svelte",
+    "apps/web-app/src/lib/domains/parables/components/piece-editor-panel",
+    "apps/web-app/src/lib/domains/parables/components/bottom-pane",
+    "apps/web-app/src/lib/server/query-layer/client.ts",
+    "apps/web-app/src/lib/server/query-layer/decode.ts"
+  ],
+  "scaffold_never_promote": [
+    "apps/web-app/src/routes/dev/ponder",
+    "localStorage PARABLES_STORAGE_KEY"
+  ],
+  "state_root": "~/.cursor/ship-feature-state/parable-613",
+  "last_author_verified": "2026-07-30"
+}

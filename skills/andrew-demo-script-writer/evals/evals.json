@@ -1,0 +1,77 @@
+{
+  "skill_name": "demo-script-writer",
+  "evals": [
+    {
+      "id": 0,
+      "name": "backend-retry-5min",
+      "prompt": "Writing up a demo for sprint review Friday — 5 min. Feature is the new connector retry policy in services/connector-sync. Before this, connector syncs against flaky partner APIs would silently fail on transient 5xx errors and we'd find out hours later when customer dashboards looked stale. Last quarter we paid $47K in SLA credits tied to this. The fix adds exponential backoff with jitter, capped at 5 attempts, and emits a structured event when we give up so oncall sees it immediately. Room is mostly engineering but our CTO and head of customer success will be there.",
+      "files": [],
+      "assertions": [
+        {"name": "uses_timestamp_format", "description": "Output includes [MM:SS] timestamp markers throughout (e.g. [00:00], [02:30])"},
+        {"name": "has_scene_structure", "description": "Output has distinct scenes/sections (at least 3) with time windows, not just flat bullet points"},
+        {"name": "quotes_47k_number_early", "description": "The $47K SLA credits number appears in the first scene (hook/problem)"},
+        {"name": "has_callback_to_hook", "description": "The $47K number or the problem framing is referenced again in the closing scene"},
+        {"name": "includes_pre_demo_checklist", "description": "Output has a pre-demo checklist section listing specific prep items"},
+        {"name": "includes_contingency_branches", "description": "Output has at least one branch/contingency for either audience-adaptation or failure recovery"},
+        {"name": "includes_practice_marks", "description": "Output has a dedicated practice-marks section with specific timestamps to hit during rehearsal"},
+        {"name": "includes_qa_section", "description": "Output has anticipated Q&A with at least 3 questions"},
+        {"name": "no_theatrical_cues", "description": "Output does NOT contain stage-direction cues like [PAUSE], [beat], [slower], >> CLICK, [emphasize]"},
+        {"name": "total_runtime_5min", "description": "Scene timestamps sum to approximately 5:00 (±30 seconds)"},
+        {"name": "separates_tech_and_exec_qa", "description": "The Q&A section splits technical vs. exec-oriented questions"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "ui-realtime-10min",
+      "prompt": "Need a 10-minute script for the new real-time query results in our data catalog. Users type a DataFusion SQL query, and instead of spinning while we fetch everything, rows stream in as they're computed. Also added a progress indicator, live cost estimate (credits consumed), and a cancel button. Demoing to our execs and a few prospects — they've seen the old catalog. Want to lead with 'the waiting is gone' not the technical architecture.",
+      "files": [],
+      "assertions": [
+        {"name": "uses_timestamp_format", "description": "Output includes [MM:SS] timestamp markers throughout"},
+        {"name": "six_beat_structure", "description": "Output has roughly 6 scenes matching the 10-min arc (hook, approach, show, turn, deep-dive, close)"},
+        {"name": "total_runtime_10min", "description": "Scene timestamps sum to approximately 10:00 (±1 minute)"},
+        {"name": "leads_with_value_not_architecture", "description": "Opening scene leads with 'the waiting is gone' / user experience framing, not with technical architecture"},
+        {"name": "includes_pre_demo_checklist", "description": "Output has a pre-demo checklist"},
+        {"name": "includes_contingency_branches", "description": "At least one branch for failure recovery (e.g., query hangs) or audience adaptation"},
+        {"name": "technical_deep_dive_scene", "description": "Has a clearly-marked technical deep-dive scene that the presenter can include or skip based on audience"},
+        {"name": "includes_practice_marks", "description": "Has a practice-marks section with specific timestamps"},
+        {"name": "includes_qa_section", "description": "Has anticipated Q&A with at least 3 questions"},
+        {"name": "no_theatrical_cues", "description": "Output does NOT contain stage-direction cues like [PAUSE], [beat], >> CLICK"},
+        {"name": "addresses_prior_catalog_context", "description": "Acknowledges prospects have seen the old catalog (sets up the before/after)"},
+        {"name": "names_the_turn_moment", "description": "There is a clearly identifiable 'aha' / turn moment in the script (e.g., first row streams in)"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "thin-sso-input",
+      "prompt": "can you write me a demo script for our new SSO feature",
+      "files": [],
+      "assertions": [
+        {"name": "asks_clarifying_questions", "description": "Assistant asks 1-2 targeted questions about the feature (e.g., aha moment, quantified impact) rather than inventing details"},
+        {"name": "limits_questions_to_two", "description": "Assistant asks at most 2 questions, not an exhaustive interview"},
+        {"name": "does_not_fabricate_numbers", "description": "If the assistant drafts anyway, it does not invent specific dollar amounts, customer counts, or latency numbers — it flags gaps instead"},
+        {"name": "flags_gaps_if_drafts", "description": "If the assistant produces a draft with placeholders, the placeholders are clearly marked as gaps for the user to fill"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "textream-export-ui245",
+      "prompt": "Take the demo script at ~/.agent/demo-scripts/ui-245-simplify-nav-2026-04-17.md and export it to textream format so I can use it as a teleprompter feed. Save the .textream file alongside the .md.",
+      "files": ["~/.agent/demo-scripts/ui-245-simplify-nav-2026-04-17.md"],
+      "assertions": [
+        {"name": "output_is_valid_json_array", "description": "The .textream file parses as a JSON array (json.loads succeeds) and the top-level is a list"},
+        {"name": "array_elements_are_strings", "description": "Every element in the array is a string, not an object or nested array"},
+        {"name": "one_element_per_scene", "description": "The array has exactly 4 elements, one per SCENE in the source .md (SCENE 1 through SCENE 4)"},
+        {"name": "rehearsal_sections_dropped", "description": "No substring from 'Pre-demo checklist', 'Contingencies', 'Anticipated Q&A', 'Practice marks', or 'Notes for the presenter' appears anywhere in the JSON content"},
+        {"name": "scene_titles_and_timestamps_dropped", "description": "The strings 'SCENE', '[00:00', '[00:45', '[02:30', '[03:15' do not appear in the JSON content — scene titles and time windows are not in the teleprompter version"},
+        {"name": "branches_dropped", "description": "The literal string 'Branch —' does not appear anywhere in the JSON content"},
+        {"name": "talk_track_preserved", "description": "Each scene's talk track content is substantially preserved — at least the anchor phrases 'Two clicks, redundant naming', 'One click, straight in', 'The thing I want you to notice isn\\'t the icon', 'one form to fill out' all appear in the output"},
+        {"name": "actions_use_uppercase_brackets", "description": "Action cues use uppercase verbs in brackets (e.g., '[CLICK', '[SWITCH', '[OPEN', '[RELOAD', '[LOG OUT'). At least 5 distinct uppercase action cues are present across the array."},
+        {"name": "delivery_cues_normalized_lowercase", "description": "Delivery cues are lowercase: '[pause]', '[beat]', '[slower]'. No '[PAUSE]' (uppercase standalone PAUSE) appears in the output — source uppercase delivery cues have been normalized"},
+        {"name": "delivery_cues_preserved", "description": "The source's delivery cues survive the translation: at least one '[pause]', one '[beat]', and one '[slower]' appear in the output"},
+        {"name": "file_saved_to_expected_path", "description": "The output file is saved to ~/.agent/demo-scripts/ui-245-simplify-nav-2026-04-17.textream (same slug + date as the source .md, with .textream extension)"},
+        {"name": "md_untouched", "description": "The source .md file is not modified by the export — textream is an additional artifact, not a replacement"},
+        {"name": "branch_warning_in_chat", "description": "The assistant's chat message mentions that branches from the .md were dropped from the .textream version (scenes 1, 2, 3, and 4 all had branches in the source), so the user knows the teleprompter is happy-path only"}
+      ]
+    }
+  ]
+}

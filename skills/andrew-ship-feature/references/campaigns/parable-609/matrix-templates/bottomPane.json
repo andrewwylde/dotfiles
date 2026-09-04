@@ -1,0 +1,86 @@
+{
+  "ticket": "PARABLE-636",
+  "region": "bottomPane",
+  "rows": [
+    {
+      "id": "desktop-default",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "ponder-region-bottom", "expected": "visible" },
+        { "kind": "testid", "selector": "parable-636-bottom-pane-mount", "expected": "visible" },
+        { "kind": "testid", "selector": "bottom-pane-results-table", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-desktop-default.png"]
+    },
+    {
+      "id": "results-populated",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder?proof=results-populated",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-results-table", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-results-populated.png"]
+    },
+    {
+      "id": "history-selected",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder?proof=history-selected",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-history-list", "expected": "visible" },
+        { "kind": "testid", "selector": "bottom-pane-history-row-run-older", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-history-selected.png"]
+    },
+    {
+      "id": "history-failed",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder?proof=history-failed",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-history-row-run-failed", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-history-failed.png"]
+    },
+    {
+      "id": "details-readonly",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder?proof=details-readonly",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-details", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-details-readonly.png"]
+    },
+    {
+      "id": "empty-no-runs",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder?proof=empty-no-runs",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "bottom-pane-history-empty", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-empty-no-runs.png"]
+    },
+    {
+      "id": "bare-mode",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder?proof=bare-mode",
+      "region": "bottomPane",
+      "assertions": [
+        { "kind": "testid", "selector": "parable-636-bottom-pane-mount", "expected": "visible" }
+      ],
+      "screenshots": ["bottomPane-bare-mode.png"]
+    }
+  ]
+}

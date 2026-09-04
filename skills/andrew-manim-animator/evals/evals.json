@@ -1,0 +1,61 @@
+{
+  "skill_name": "manim-animator",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "math-gradient-descent",
+      "prompt": "I'm writing a blog post about gradient descent and I want a short clip to embed. Show a ball rolling down a 1D parabola (something like f(x) = 0.5 x^2) — the ball should pause at the minimum so I can narrate 'and here's where the gradient is zero.' Give me something I can render locally.",
+      "expected_output": "A valid Manim scene .py file that renders a parabola with a moving ball tracking its position, including a pause at the minimum. Surface colors are configurable (not hard-coded dark-on-black).",
+      "files": [],
+      "expectations": [
+        "Output includes a .py file that parses as valid Python via ast.parse",
+        "The .py file defines at least one class that inherits from Scene (or a Scene subclass like MovingCameraScene, ThreeDScene, etc.)",
+        "The .py file uses at least one transform-family call (Write, Create, FadeIn, FadeOut, Transform, ReplacementTransform, GrowFromCenter, Indicate, etc.)",
+        "The .py file contains at least one self.wait(...) pacing beat",
+        "The .py file does NOT set config.background_color (surface aesthetics stay configurable, not locked to 3b1b's palette)"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "systems-request-flow",
+      "prompt": "Quick explainer clip for our onboarding doc. Animate a client request going through our API gateway to the auth service, then down to the data service, then show the response coming back. Keep it short — about 30 seconds. I want to see the request actually move between the boxes, not just arrows lighting up.",
+      "expected_output": "A valid Manim scene .py file with named service boxes (client, gateway, auth, data), a moving Dot/Circle representing the request, and a response beat where the dot travels back. Transforms and pauses present. Colors not hard-coded to a 3b1b palette.",
+      "files": [],
+      "expectations": [
+        "Output includes a .py file that parses as valid Python via ast.parse",
+        "The .py file defines at least one class that inherits from Scene (or a Scene subclass)",
+        "The .py file uses at least one transform-family call (Write, Create, FadeIn, Transform, ReplacementTransform, etc.)",
+        "The .py file contains at least one self.wait(...) pacing beat",
+        "The .py file does NOT set config.background_color"
+      ]
+    },
+    {
+      "id": 3,
+      "eval_name": "data-etl-pipeline",
+      "prompt": "Can you make an animation for our intro deck that shows rows moving through an ETL pipeline — raw source → filter → enrich → aggregate → output? Not just a static flowchart; I want to actually see the rows flow through each stage and change shape as they get filtered and enriched.",
+      "expected_output": "A valid Manim scene .py file with 4+ named pipeline stages, a row-like structure (grid of cells, labeled columns) that moves through stages with visible transformations (drop column, add column, collapse multiple rows). Pauses between beats. Colors not locked to a fixed palette.",
+      "files": [],
+      "expectations": [
+        "Output includes a .py file that parses as valid Python via ast.parse",
+        "The .py file defines at least one class that inherits from Scene (or a Scene subclass)",
+        "The .py file uses at least one transform-family call (Write, Create, FadeIn, Transform, ReplacementTransform, etc.)",
+        "The .py file contains at least one self.wait(...) pacing beat",
+        "The .py file does NOT set config.background_color"
+      ]
+    },
+    {
+      "id": 4,
+      "eval_name": "algorithm-bfs-traversal",
+      "prompt": "Students always struggle with BFS vs DFS. Make a short Manim scene that visualizes BFS on a small graph — maybe 8 to 10 nodes — and shows it expanding layer by layer. The 'aha' is that BFS finishes exploring layer 1 completely before moving on to layer 2. Make the layer boundary very clear visually (e.g., color nodes by layer).",
+      "expected_output": "A valid Manim scene .py file with 8–10 labeled nodes, edges between them, and an animation that highlights nodes in BFS order layer by layer. Uses transforms for the highlights and pauses between layers. Surface colors configurable.",
+      "files": [],
+      "expectations": [
+        "Output includes a .py file that parses as valid Python via ast.parse",
+        "The .py file defines at least one class that inherits from Scene (or a Scene subclass)",
+        "The .py file uses at least one transform-family call (Write, Create, FadeIn, Transform, ReplacementTransform, etc.)",
+        "The .py file contains at least one self.wait(...) pacing beat",
+        "The .py file does NOT set config.background_color"
+      ]
+    }
+  ]
+}

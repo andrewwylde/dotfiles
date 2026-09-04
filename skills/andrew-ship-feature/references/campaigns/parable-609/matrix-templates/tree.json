@@ -1,0 +1,17 @@
+{
+  "ticket": "PARABLE-631",
+  "region": "tree",
+  "rows": [
+    {
+      "id": "desktop-default",
+      "viewport": { "width": 1280, "height": 900 },
+      "theme": "dark",
+      "route": "/dev/ponder",
+      "region": "tree",
+      "assertions": [
+        { "kind": "testid", "selector": "ponder-region-tree", "expected": "visible" }
+      ],
+      "screenshots": ["tree-desktop-default.png"]
+    }
+  ]
+}

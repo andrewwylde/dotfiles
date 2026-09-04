@@ -1,0 +1,12 @@
+{
+  "slack_user_id": "",
+  "lookback_days": 7,
+  "decay_weeks": 4,
+  "max_snippets": 6,
+  "sticky_lexicon_min_count": 3,
+  "channel_ids": [],
+  "ollama_model": "qwen2.5:14b",
+  "ollama_host": "http://127.0.0.1:11434",
+  "backfill_days": 180,
+  "ollama_max_messages": 120
+}

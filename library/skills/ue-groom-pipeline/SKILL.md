@@ -1,8 +1,8 @@
 ---
 name: ue-groom-pipeline
-description: "Blender-to-Unreal strand-based hair and fur pipeline using modern Hair Curves (Blender 3.3+) and Alembic export for UE5 Groom system. Use when creating procedural groom curves, exporting .abc for Groom import, setting up groom physics (Rods/Springs/Niagara), or validating strand topology. NOT for polygon hair cards (use vendor hair-groom). NOT for FBX mesh export (use vendor unreal-export)."
+description: Blender-to-Unreal strand-based hair and fur pipeline using modern Hair Curves (Blender 3.3+) and Alembic export for UE5 Groom system. Use when creating procedural groom curves, exporting .abc for Groom import, setting up groom physics (Rods/Springs/Niagara), or validating strand topology. NOT for polygon hair cards (use vendor hair-groom). NOT for FBX mesh export (use vendor unreal-export).
 metadata:
-  version: "2026.1.0"
+  version: 2026.1.0
   engine: unreal
   category: groom
   difficulty: advanced
@@ -66,6 +66,7 @@ Procedural strand-based hair and fur from Blender Hair Curves to Unreal Engine 5
 |--------|---------|-----------|
 | `scripts/export_ue_alembic_groom.py` | Full pipeline: root snap → resample → attributes → Alembic export | MCP `execute_blender_code` or `blender --background --python` |
 | `scripts/validate_groom_curves.py` | Structural checks: strand count, point uniformity, normal alignment, root distance, attributes | MCP `execute_blender_code` or `blender --background --python` |
+| `scripts/import_ue_alembic_groom.py` | UE Ingestion: Alembic import → geometric gate → UGroomBindingAsset → component verification | UE Python MCP or CLI |
 
 ### Script Configuration
 
@@ -129,8 +130,56 @@ Character Blueprint → Add Component → Groom Component
   → Attach to: Mesh (skeletal mesh component)
 ```
 
+### Automated Headless / Python Ingestion & Binding
+
+When running through automation, headless commandlets, or Unreal MCP, use `scripts/import_ue_alembic_groom.py` or execute the verified ingestion workflow directly:
+
+```python
+import unreal
+
+# 1. Configure import task with GroomConversionSettings
+task = unreal.AssetImportTask()
+task.filename = "C:/path/to/GRM_Character_Region.abc".replace("\\", "/")
+task.destination_path = "/Game/Grooms"
+task.destination_name = "GRM_Character_Region"
+task.replace_existing = True
+task.automated = True
+task.save = True
+
+options = unreal.GroomImportOptions()
+conversion = unreal.GroomConversionSettings()
+# scale=1.0 assumes Blender exported with scale=100.0 (meters to cm)
+conversion.scale = unreal.Vector(1.0, 1.0, 1.0)
+conversion.rotation = unreal.Rotator(0.0, 0.0, 0.0)
+options.conversion_settings = conversion
+task.options = options
+
+asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
+asset_tools.import_asset_tasks([task])
+
+groom_asset = unreal.load_asset(f"{task.destination_path}/{task.destination_name}")
+assert groom_asset is not None, f"Failed to load GroomAsset at {task.destination_path}/{task.destination_name}"
+
+# 2. Mandatory Deterministic Geometric Gate (Pre-Visual Verification)
+assert groom_asset.get_num_hair_groups() > 0, "Groom has 0 hair groups! Empty curves exported."
+bounds = groom_asset.get_bounds()
+assert bounds.sphere_radius > 0.1, f"Degenerate groom bounds (radius={bounds.sphere_radius})! Hair collapsed to origin."
+
+# 3. For deforming Skeletal Mesh targets: generate UGroomBindingAsset
+# skel_mesh = unreal.load_asset("/Game/Characters/SK_Hero")
+# binding_asset = unreal.GroomBlueprintLibrary.create_groom_binding_asset(groom_asset, skel_mesh)
+# unreal.EditorAssetLibrary.save_loaded_asset(binding_asset)
+
+# 4. Component Assignment and Verification Gate
+# groom_comp.set_editor_property("groom_asset", groom_asset)
+# if binding_asset:
+#     groom_comp.set_editor_property("binding_asset", binding_asset)
+# assert groom_comp.get_editor_property("groom_asset") == groom_asset, "GroomAsset binding assertion failed!"
+```
+
 ## Validation Protocol
 
+### 1. Blender Pre-Export Gate
 Before exporting, run `scripts/validate_groom_curves.py` via MCP. All checks must pass:
 
 | Check | Pass Criteria | Failure Action |
@@ -141,6 +190,20 @@ Before exporting, run `scripts/validate_groom_curves.py` via MCP. All checks mus
 | Root Distance | All roots within tolerance of skin | Re-run root snap |
 | Attributes | `groom_group_id` INT/CURVE present | Run attribute assignment |
 
+### 2. Unreal Engine Stage Verification Gate (Two-Tier)
+After importing and attaching to an actor in Unreal Engine, execute the following assertions before declaring completion:
+
+1. **Deterministic Programmatic Gate (MANDATORY)**:
+   - **Asset Existence**: `unreal.EditorAssetLibrary.does_asset_exist(package_path)` returns True.
+   - **Geometry Populated**: `groom_asset.get_num_hair_groups() > 0` and `groom_asset.get_bounds().sphere_radius > 0.1`.
+   - **Component Binding**: `groom_comp.get_editor_property("groom_asset")` references the imported asset, NOT None.
+   - **Deforming Mesh Binding**: If parent is `SkeletalMeshComponent`, verify `groom_comp.get_editor_property("binding_asset")` is assigned.
+2. **Visual Inspection Gate**:
+   - In interactive GUI sessions: Capture viewport via `EditorAppToolset.CaptureViewport`.
+   - Copy screenshot into `<appDataDir>/brain/<conversation-id>/` and inspect via `view_file`.
+   - Verify visible outward strand silhouette displacement beyond the base mesh hull (distinguishing real geometry from surface specular highlights).
+   - In headless CI (`-nullrhi`): Programmatic geometry metrics are the authoritative pass.
+
 ## Constraints
 
 ### MUST DO
@@ -149,6 +212,9 @@ Before exporting, run `scripts/validate_groom_curves.py` via MCP. All checks mus
 - Assign `groom_group_id` before export (UE uses this for material separation)
 - Validate before export — never export unchecked curves
 - Follow naming: `CRV_Hair_[Region]` for objects, `GRM_[Character]_[Region].abc` for files
+- Execute the ingestion script in UE; NEVER assume writing a script to disk imports the asset
+- Assert `groom_comp.get_editor_property("groom_asset")` is non-null before declaring stage complete
+- Copy viewport captures to the active conversation artifact directory and use forward-slash paths (`![caption](/C:/path/to/image.png)`)
 
 ### MUST NOT DO
 - Convert curves to meshes, ribbons, or polygon strips
@@ -156,3 +222,5 @@ Before exporting, run `scripts/validate_groom_curves.py` via MCP. All checks mus
 - Mix variable point counts within a single groom group
 - Export without root anchoring (causes floating hair in UE)
 - Skip validation script before Alembic export
+- Declare completion or visual success on a bare mesh without confirming hair strand geometry
+- Embed images in walkthrough markdown using raw Windows backslashes (`C:\...`)

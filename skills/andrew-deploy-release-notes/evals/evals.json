@@ -1,0 +1,23 @@
+{
+  "skill_name": "deploy-release-notes",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate release notes for this deploy: https://github.com/parable-work/parable-platform/actions/runs/23450747751",
+      "expected_output": "Markdown release notes file at ./.context/release-notes-0103f40.md with product and engineering sections, grouped by service, with Linear ticket links",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "What's in deploy 23437236650?",
+      "expected_output": "Release notes comparing deploy 23437236650 (a8fc5ac) against the previous successful deploy (60359160d), grouped by service with appropriate tone per audience",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "What shipped in the last prod deploy?",
+      "expected_output": "Should identify the most recent deploy run, find its SHA, compare to previous deploy, and generate release notes",
+      "files": []
+    }
+  ]
+}

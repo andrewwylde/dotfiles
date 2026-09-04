@@ -1,0 +1,2 @@
+{"type":"config","name":"Optimize agent-sync dotfiles management performance","metricName":"sync_µs","metricUnit":"µs","bestDirection":"lower"}
+{"run":1,"commit":"baselin","metric":355117,"metrics":{},"status":"keep","description":"Baseline measurement of agent-sync dotfiles management performance. Library contains 261 items (139 skills, 22 commands, 99 agents, 1 hook). Total sync time is dominated by file scanning and library enumeration operations.","timestamp":1788522498037,"segment":0,"confidence":null}
