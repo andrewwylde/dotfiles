@@ -108,3 +108,6 @@ agent-sync/target/
 
 # Local Unreal test project
 ue-test-project/
+
+# Local tools and runtimes
+.local/
