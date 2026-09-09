@@ -105,3 +105,6 @@ agent-sync/target/
 .taskmaster/tasks/
 .taskmaster/config.json
 .taskmaster/state.json
+
+# Local Unreal test project
+ue-test-project/
