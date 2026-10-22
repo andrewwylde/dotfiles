@@ -17,6 +17,24 @@ elif [ -x "$DOTFILES/agent-sync/target/release/agent-sync" ]; then
     || echo "agent-sync sync failed (see above)" >&2
 fi
 
+# Superpowers ships per-harness plugins (keeps the `superpowers:` namespace the
+# Library's commands reference), so install natively instead of via agent-sync.
+if command -v claude >/dev/null 2>&1 && \
+  ! claude plugin list 2>/dev/null | grep -q 'superpowers@'; then
+  claude plugin install superpowers@claude-plugins-official \
+    || echo "superpowers install for claude failed" >&2
+fi
+if command -v codex >/dev/null 2>&1 && \
+  ! codex plugin list 2>/dev/null | grep -Eq '^superpowers@[^ ]+ +installed'; then
+  codex plugin add superpowers@openai-curated-remote \
+    || echo "superpowers install for codex failed" >&2
+fi
+if command -v agy >/dev/null 2>&1 && \
+  ! agy plugin list 2>/dev/null | grep -q '^- superpowers '; then
+  agy plugin install https://github.com/obra/superpowers \
+    || echo "superpowers install for agy failed" >&2
+fi
+
 touch "$HOME"/.psqlrc.local
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
